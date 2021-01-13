@@ -26,6 +26,7 @@ import com.tjmedicine.emergency.model.widget.RoundImageView;
 import com.tjmedicine.emergency.model.widget.SelectPicDialog;
 import com.tjmedicine.emergency.model.widget.SelectSexDialog;
 import com.tjmedicine.emergency.ui.login.view.activity.LoginActivity;
+import com.tjmedicine.emergency.ui.me.presenter.LogoutPresenter;
 import com.tjmedicine.emergency.ui.me.presenter.MinePresenter;
 
 import java.util.ArrayList;
@@ -36,11 +37,11 @@ import java.util.Map;
 
 import butterknife.BindView;
 
-public class PersonalActivity extends BaseActivity implements IMineFragmentView {
+public class PersonalActivity extends BaseActivity implements IMineFragmentView, ILogOutView {
 
     private MinePresenter minePresenter = new MinePresenter(this);
 //    private UploadFilePresenter uploadFilePresenter = new UploadFilePresenter(this);
-//    private LogoutPresenter logoutPresenter = new LogoutPresenter(this);
+    private LogoutPresenter logoutPresenter = new LogoutPresenter(this);
     @BindView(R.id.tv_title)
     TextView mTitle;
     @BindView(R.id.tv_common_right)
@@ -135,7 +136,7 @@ public class PersonalActivity extends BaseActivity implements IMineFragmentView 
             @Override
             public void onMultiClick(View v) {
                 mApp.getLoadingDialog().show();
-//                logoutPresenter.logOut();
+                logoutPresenter.logOut();
             }
         });
     }
@@ -279,19 +280,19 @@ public class PersonalActivity extends BaseActivity implements IMineFragmentView 
 //    }
 //
 //
-//    @Override
-//    public void logoutSuccess() {
-//        mApp.getLoadingDialog().hide();
-//        UserInfo.removeUserInfo();
-//        mApp.shortToast("退出成功");
-//        startActivity(LoginActivity.class);
-//        finish();
-//    }
-//
-//    @Override
-//    public void logoutFail(String info) {
-//        mApp.getLoadingDialog().hide();
-//        mApp.shortToast(info);
-//    }
+    @Override
+    public void logoutSuccess() {
+        mApp.getLoadingDialog().hide();
+        UserInfo.removeUserInfo();
+        mApp.shortToast("退出成功");
+        startActivity(LoginActivity.class);
+        finish();
+    }
+
+    @Override
+    public void logoutFail(String info) {
+        mApp.getLoadingDialog().hide();
+        mApp.shortToast(info);
+    }
 
 }
