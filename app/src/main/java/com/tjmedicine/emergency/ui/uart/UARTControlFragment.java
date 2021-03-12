@@ -29,6 +29,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
@@ -57,18 +58,27 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.google.gson.Gson;
 import com.jude.easyrecyclerview.EasyRecyclerView;
 import com.jude.easyrecyclerview.adapter.BaseViewHolder;
+import com.lxj.xpopup.XPopup;
 import com.orhanobut.logger.Logger;
+import com.tjmedicine.emergency.EmergencyApplication;
 import com.tjmedicine.emergency.R;
 import com.tjmedicine.emergency.common.base.Adapter;
 import com.tjmedicine.emergency.common.base.OnMultiClickListener;
 import com.tjmedicine.emergency.common.base.ViewHolder;
 import com.tjmedicine.emergency.common.cache.SharedPreferences.UserInfo;
 import com.tjmedicine.emergency.common.cache.db.SQLiteHelper;
+import com.tjmedicine.emergency.common.dialog.CustomDjsFullScreenPopup;
 import com.tjmedicine.emergency.common.dialog.DialogManage;
+import com.tjmedicine.emergency.common.global.Constants;
+import com.tjmedicine.emergency.common.global.GlobalConstants;
+import com.tjmedicine.emergency.common.net.HttpProvider;
+import com.tjmedicine.emergency.common.net.HttpsUtils;
+import com.tjmedicine.emergency.ui.bean.PDBean;
 import com.tjmedicine.emergency.ui.uart.data.presenter.IUARTControlView;
 import com.tjmedicine.emergency.ui.uart.data.presenter.UARTControlPresenter;
 import com.tjmedicine.emergency.ui.uart.domain.Command;
 import com.tjmedicine.emergency.ui.uart.domain.UartConfiguration;
+import com.tjmedicine.emergency.ui.uart.profile.BleProfileServiceReadyActivity;
 import com.tjmedicine.emergency.ui.uart.profile.UARTInterface;
 import com.tjmedicine.emergency.utils.GifLoadOneTimeGif;
 import com.tjmedicine.emergency.utils.GsonUtils;
@@ -76,6 +86,7 @@ import com.tjmedicine.emergency.utils.LCIMAudioHelper;
 import com.tjmedicine.emergency.utils.SoundPlayUtils;
 import com.tjmedicine.emergency.utils.ToastUtils;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -84,6 +95,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import lecho.lib.hellocharts.model.Axis;
+import lecho.lib.hellocharts.model.AxisValue;
+import lecho.lib.hellocharts.model.Line;
+import lecho.lib.hellocharts.model.LineChartData;
+import lecho.lib.hellocharts.model.PointValue;
+import lecho.lib.hellocharts.model.ValueShape;
+import lecho.lib.hellocharts.model.Viewport;
+import lecho.lib.hellocharts.util.ChartUtils;
+import lecho.lib.hellocharts.view.LineChartView;
 
 
 public class UARTControlFragment extends Fragment implements UARTActivity.ConfigurationListener, IUARTControlView {
@@ -105,10 +126,40 @@ public class UARTControlFragment extends Fragment implements UARTActivity.Config
     List<String> liscount;
     List<String> lisdata;
     List<String> serverDataList;
+    List<String> blowList = new ArrayList<>();
+
+    private LineChartView chart;        //显示线条的自定义View
+    private LineChartData data;          // 折线图封装的数据类
+    private int numberOfLines = 1;         //线条的数量
+    private int maxNumberOfLines = 4;     //最大的线条数据
+//    private int numberOfPoints = 12;     //点的数量
+
+    //    private float[][] randomNumbersTab = new float[maxNumberOfLines][numberOfPoints];         //二维数组，线的数量和点的数量
+    private List<PDBean> listBlood = new ArrayList<PDBean>();//数据
+
+    private boolean hasAxes = true;       //是否有轴，x和y轴
+    private boolean hasAxesNames = true;   //是否有轴的名字
+    private boolean hasLines = true;       //是否有线（点和点连接的线）
+    private boolean hasPoints = true;       //是否有点（每个值的点）
+    private ValueShape shape = ValueShape.CIRCLE;    //点显示的形式，圆形，正方向，菱形
+    private boolean isFilled = false;                //是否是填充
+    private boolean hasLabels = false;               //每个点是否有名字
+    private boolean isCubic = false;                 //是否是立方的，线条是直线还是弧线
+    private boolean hasLabelForSelected = false;       //每个点是否可以选择（点击效果）
+    private boolean pointsHaveDifferentColor;           //线条的颜色变换
+    private boolean hasGradientToTransparent = false;      //是否有梯度的透明
+
+    private List<AxisValue> mAxisXValues = new ArrayList<AxisValue>();   //x轴方向的坐标数据
+    private List<AxisValue> mAxisYValues = new ArrayList<AxisValue>();
+
+
     Timer timer;
     private UARTService.UARTBinder bleService;
     private UARTControlPresenter uartControlPresenter = new UARTControlPresenter(this);
     DialogManage mApp;
+    //是否吹气   每个15次按压检测是否有吹气
+    int blowCount = 0;
+    private CustomDjsFullScreenPopup customDjsFullScreenPopup;
 
     @Override
     public void onAttach(@NonNull final Context context) {
@@ -136,43 +187,28 @@ public class UARTControlFragment extends Fragment implements UARTActivity.Config
         requireActivity().registerReceiver(myReceiver, intentFilter);
         mApp = new DialogManage(requireActivity());
         new SoundPlayUtils(requireActivity());
-    }
 
 
-    public void onServiceStarted() {
-        // The service has been started, bind to it
-        final Intent service = new Intent(getActivity(), UARTService.class);
-        requireActivity().bindService(service, serviceConnection, 0);
     }
 
     private ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(final ComponentName name, final IBinder service) {
             bleService = (UARTService.UARTBinder) service;
+
+            Log.e(TAG, "onServiceConnected: ------------------------------" + bleService.getBluetoothDevice());
+
+            Log.d(TAG, "onServiceConnected: ------------------------------" + bleService.getDeviceAddress());
+
+            Log.d(TAG, "onServiceConnected: ------------------------------" + bleService.getDeviceName());
+
+            Log.e(TAG, "onServiceConnected: ------------------------------");
             uartInterface = bleService;
-//            if (bleService.isConnected()) {
-//                if (null != uartInterface) {
-//                    Logger.d("执行1111111111111");
-//                    bleService.send("<M>Start</M>");
-//                }
-//            }
 
-
-//			logSession = bleService.getLogSession();
-
-            // Start the loader
-			/*if (logSession != null) {
-				getLoaderManager().restartLoader(LOG_REQUEST_ID, null, UARTLogFragment.this);
-			}*/
-
-            // and notify user if device is connected
-//			if (bleService.isConnected())
-//				onDeviceConnected();
         }
 
         @Override
         public void onServiceDisconnected(final ComponentName name) {
-//			onDeviceDisconnected();
             uartInterface = null;
         }
     };
@@ -192,6 +228,8 @@ public class UARTControlFragment extends Fragment implements UARTActivity.Config
         tv_connect = view.findViewById(R.id.action_connect);
         mStartRobot = view.findViewById(R.id.start_robot);
         chronometer = view.findViewById(R.id.chronometer);
+        chart = (LineChartView) view.findViewById(R.id.chart);
+
         chronometer.setFormat("练习时长：%s");
         mCountdownView = view.findViewById(R.id.iv_countdown);
         if (System.currentTimeMillis() - startTime == 5000) {
@@ -200,11 +238,116 @@ public class UARTControlFragment extends Fragment implements UARTActivity.Config
         }
         startUARTRobot();
         initRecyclerView();
-
-        Log.e(TAG, " --UARTControlFragment-token >" + UserInfo.getToken());
-
+        generateValues();
+        generateData();
+        resetViewport();
         return view;
     }
+
+    private void generateValues() {
+//        listBlood.add(new PDBean("1", 20));
+//        listBlood.add(new PDBean("2", 60));
+//        listBlood.add(new PDBean("3", 10));
+//        listBlood.add(new PDBean("4", 90));
+//        listBlood.add(new PDBean("5", 80));
+//        listBlood.add(new PDBean("6", 40));
+        mAxisXValues.clear();
+        for (int i = 0; i < listBlood.size(); i++) {
+            mAxisXValues.add(new AxisValue(i / 2).setLabel(""));
+        }
+        mAxisYValues.clear();
+        //设置y轴坐标，显示的是数值0，30，60.。。。
+        for (int i = 0; i < 8; i++) {
+            int lengthY = 10 * i;
+            mAxisYValues.add(new AxisValue(lengthY / 2).setLabel("" + lengthY));
+        }
+//        mAxisXValues.clear();
+//        for (int i = 0; i < listBlood.size(); i++) {
+//            mAxisXValues.add(new AxisValue(i / 2).setLabel(""));
+//        }
+//        mAxisYValues.clear();
+//        //设置y轴坐标，显示的是数值0，30，60.。。。
+//        for (int i = 0; i < 8; i++) {
+//            int lengthY = 10 * i;
+//            mAxisYValues.add(new AxisValue(lengthY / 2).setLabel("" + lengthY));
+//        }
+    }
+
+    private void generateData() {
+        //存放线条对象的集合
+        List<Line> lines = new ArrayList<Line>();
+        //把数据设置到线条上面去
+        for (int i = 0; i < numberOfLines; ++i) {
+            List<PointValue> values = new ArrayList<PointValue>();
+            for (int j = 0; j < listBlood.size(); ++j) {
+                //PointValue的两个参数值，一个是距离y轴的长度距离，另一个是距离x轴长度距离
+                values.add(new PointValue(j, listBlood.get(j).getValue()));  //y的值除以2，因为默认在y上显示的是0到100，0到200的数值除以2，就相当于0到100.
+            }
+
+            Line line = new Line(values);
+            //设置线条的基本属性
+            line.setColor(ChartUtils.COLORS[i]);
+            line.setShape(shape);
+            line.setCubic(isCubic);
+            line.setFilled(isFilled);
+            line.setHasLabels(hasLabels);
+            line.setHasLabelsOnlyForSelected(hasLabelForSelected);
+            line.setHasLines(hasLines);
+            line.setHasPoints(hasPoints);
+            if (pointsHaveDifferentColor) {
+                line.setPointColor(ChartUtils.COLORS[(i + 1) % ChartUtils.COLORS.length]);
+            }
+            lines.add(line);
+        }
+
+        data = new LineChartData(lines);
+
+        if (hasAxes) {
+            Axis axisX = new Axis();
+            Axis axisY = new Axis().setHasLines(true);
+            if (hasAxesNames) {
+                axisX.setName("时间");
+                axisY.setName("按压深度(mm)");
+            }
+
+            //对x轴，数据和属性的设置
+            axisX.setTextSize(8);//设置字体的大小
+            axisX.setHasTiltedLabels(false);//x坐标轴字体是斜的显示还是直的，true表示斜的
+            axisX.setTextColor(Color.BLACK);//设置字体颜色
+            axisX.setHasLines(true);//x轴的分割线
+            axisX.setValues(mAxisXValues); //设置x轴各个坐标点名称
+
+            //对Y轴 ，数据和属性的设置
+            axisY.setTextSize(10);
+            axisY.setHasTiltedLabels(false);//true表示斜的
+            axisY.setTextColor(Color.BLACK);//设置字体颜色
+            axisY.setValues(mAxisYValues); //设置x轴各个坐标点名称
+
+
+            data.setAxisXBottom(axisX);//x轴坐标线的文字，显示在x轴下方
+            //data.setAxisXTop();      //显示在x轴上方
+            data.setAxisYLeft(axisY);   //显示在y轴的左边
+
+        } else {
+            data.setAxisXBottom(null);
+            data.setAxisYLeft(null);
+        }
+
+        data.setBaseValue(Float.NEGATIVE_INFINITY);
+        chart.setLineChartData(data);
+    }
+
+    private void resetViewport() {
+        // Reset viewport height range to (0,100)
+        final Viewport v = new Viewport(chart.getMaximumViewport());
+        v.bottom = 0;
+        v.top = 100;
+        v.left = 0;
+        v.right = 12; //  listBlood.size() - 1//如何解释
+        chart.setMaximumViewport(v);
+        chart.setCurrentViewport(v);
+    }
+
 
     /**
      * 开启模拟人
@@ -215,15 +358,16 @@ public class UARTControlFragment extends Fragment implements UARTActivity.Config
             public void onMultiClick(View v) {
                 if (null != uartInterface) {
                     if (incline) {
-                        SoundPlayUtils.play(5);
-                        GifLoadOneTimeGif.loadOneTimeGif(requireActivity(), R.drawable.countdown, mCountdownView, 1, new GifLoadOneTimeGif.GifListener() {
+                        customDjsFullScreenPopup = new CustomDjsFullScreenPopup(requireActivity(), new CustomDjsFullScreenPopup.OnMyCompletionListener() {
                             @Override
-                            public void gifPlayComplete() {
+                            public void onClick() {
+                                customDjsFullScreenPopup.dismiss();
                                 //播放完成回调
                                 //final String text = field.getText().toString();
                                 Log.e(TAG, "onMultiClick:111-- " + incline);
                                 if (null != uartInterface) {
-                                    uartInterface.send("<M>Start</M>");
+                                    uartInterface.send("<TestStart>");
+                                    HttpProvider.doGet(GlobalConstants.APP_BURIED_POINT + Constants.B_BLE_START + "," + bleService.getDeviceAddress(), null);
                                     startTimer();
                                 }
                                 liscount = new ArrayList<>();
@@ -233,18 +377,18 @@ public class UARTControlFragment extends Fragment implements UARTActivity.Config
                                 serverDataList = new ArrayList<>();
                             }
                         });
-
+                        new XPopup.Builder(requireActivity()).asCustom(customDjsFullScreenPopup).show();
                     } else {
                         Log.e(TAG, "onMultiClick:2222-- " + incline);
                         mStartRobot.setText("开启模拟人");
-                        uartInterface.send("<M>Stop</M>");
+                        uartInterface.send("<TestStop>");
                         chronometer.setFormat("计时结束：%s");
                         chronometer.stop();
                         if (timer != null) {
                             timer.cancel();
                         }
                         mApp.getLoadingDialog().show();
-
+                        HttpProvider.doGet(GlobalConstants.APP_BURIED_POINT + Constants.B_BLE_END + "," + bleService.getDeviceAddress(), null);
                         Log.e(TAG, " --UARTControlFragment---传递服务器数据:-------> " + new Gson().toJson(serverDataList));
                         uartControlPresenter.postUARTData(serverDataList, "2");
                         incline = true;
@@ -261,7 +405,7 @@ public class UARTControlFragment extends Fragment implements UARTActivity.Config
     private void startTimer() {
 
         startTime = System.currentTimeMillis();
-        // 启动计时器，延迟 1s 执行，每 5s 执行一次
+        // 启动计时器，延迟 1s 执行，每 10s 执行一次
         timer = new Timer();
         timer.schedule(new TimerTask() {
             @Override
@@ -270,9 +414,10 @@ public class UARTControlFragment extends Fragment implements UARTActivity.Config
                 msg.what = 1;
                 msg.obj = "";
                 msg.sendToTarget();
+
             }
-        }, 5000, 10000);
-        ToastUtils.showImageToas(requireActivity(), "开始模拟人操作,请按压模拟人");
+        }, 10000, 10000);
+        //ToastUtils.showImageToas(requireActivity(), "开始模拟人操作,请按压模拟人");
         mStartRobot.setText("结束");
         chronometer.setFormat("练习时长：%s");
         chronometer.setBase(SystemClock.elapsedRealtime());// 去掉可实现暂停功能
@@ -283,61 +428,63 @@ public class UARTControlFragment extends Fragment implements UARTActivity.Config
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
-            //PDSpeed();
+            PDSpeed();
         }
     };
 
     /**
+     * 按压深度
+     * 5cm -6cm
+     */
+
+
+    /**
+     * 频率
      * 按压速度
+     * 30次按压之后+2次呼吸
      */
     private void PDSpeed() {
-        String music = "android.resource://" + requireActivity().getPackageName() + "/" + R.raw.music;
-
-        LCIMAudioHelper.getInstance().playAudio(music);
         Log.d("TAG", "handleMessage: timer  lisdata-->" + lisdata.size());
         // 20次/10S
         for (int i = 0; i < lisdata.size(); i++) {
             if (lisdata.get(i).contains("PD")) {
-                liscount.add(lisdata.get(i));
+                liscount.add(lisdata.get(i));  // 10s内 blow的次数
             }
         }
+        //x < 16
+        // 10S 按压16-20次
+        //x> 20
+
+
+
         if (liscount.size() < 16) {
             liscount.clear();
             lisdata.clear();
-            Log.d("TAG", "handleMessage: timer 按压太慢慢慢了" + liscount.size());
-//                ToastUtils.showImageToas(requireActivity(), "按压太慢慢慢了");
-            LCIMAudioHelper.getInstance().playAudio(music);
-//                MediaPlayer mediaPlayer = MediaPlayer.create(getActivity(), R.raw.music);
-            //用prepare方法，会报错误java.lang.IllegalStateExceptio
-            //mediaPlayer.prepare();
-//                mediaPlayer.start();
+            MediaPlayer mediaPlayer = MediaPlayer.create(getActivity(), R.raw.pd_slow);
+            mediaPlayer.start();
+            Log.d("TAG", "handleMessage: timer 按压太慢慢慢了");
         } else if (liscount.size() > 20) {
-//                MediaPlayer mediaPlayer = MediaPlayer.create(getActivity(), R.raw.music);
-            //用prepare方法，会报错误java.lang.IllegalStateExceptio
-            //mediaPlayer.prepare();
-//                mediaPlayer.start();
-            LCIMAudioHelper.getInstance().playAudio(music);
+            MediaPlayer mediaPlayer = MediaPlayer.create(getActivity(), R.raw.pd_fast);
+            mediaPlayer.start();
             liscount.clear();
             lisdata.clear();
-            Log.d("TAG", "handleMessage: timer 按压太快快快了" + liscount.size());
-//            ToastUtils.showImageToas(requireActivity(), "按压太快快快了");
+            Log.d("TAG", "handleMessage: timer 按压太快快快了");
         }
     }
 
 
     @Override
     public void onConfigurationModified() {
-
     }
 
     @Override
     public void onConfigurationChanged(@NonNull final UartConfiguration configuration) {
+
     }
 
     @Override
-    public void postUARTDataSuccess(String  score) {
+    public void postUARTDataSuccess(Double score) {
         mApp.getLoadingDialog().hide();
-
     }
 
     @Override
@@ -354,16 +501,122 @@ public class UARTControlFragment extends Fragment implements UARTActivity.Config
 //            Toast.makeText(context, intent.getStringExtra(Intent.EXTRA_TEXT), Toast.LENGTH_SHORT).show();
             String data = intent.getStringExtra(Intent.EXTRA_TEXT);
             Log.e(TAG, " --UARTControlFragment---onReceive:-------> " + data);
-
+            GsonUtils.returnFormatText2(data);
 //            Map<String, Object> stringObjectMap = new HashMap<>();
 //            stringObjectMap.put("id", System.currentTimeMillis());
 //            stringObjectMap.put("data", data);
             //SQLiteHelper.getInstance().mUartDB.insertData(SQLiteHelper.getInstance().getDBInstance(), stringObjectMap);
-            String s = GsonUtils.returnFormatText(data);
+//            String s = GsonUtils.returnFormatText(data);
             // String s1 = GsonUtils.returnStatus(s);//最终要展示的数据
-            Message message = Message.obtain();
-            message.obj = s;
-            mHandler.sendMessage(message);
+//            Message message = Message.obtain();
+//            message.obj = s;
+//            mHandler.sendMessage(message);
+        }
+    }
+
+
+    @SuppressLint("HandlerLeak")
+    public Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+
+            Log.e(TAG, "数据回调: " + msg.obj.toString());
+            if (msg.obj.toString().equals("OK")) {
+                return;
+            }
+            if (msg.obj.toString().equals("error")) {
+                return;
+            }
+//            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//            for (int i = 0; i < 3; i++) {
+//                try {
+//                    Thread.sleep(5 * 1000); //设置暂停的时间 5 秒
+//                    Log.e(TAG, "时间: "+sdf.format(new Date()) + "--循环执行第" + (i+1) + "次");
+//                    System.out.println(sdf.format(new Date()) + "--循环执行第" + (i+1) + "次");
+//
+//                    List<String> allData = mAdapter.getAllData();
+//
+//                    for (int i1 = 0; i1 < allData.size(); i1++) {
+//
+//                        if (allData.get(i).contains("PD")) {
+//                            System.out.println(sdf.format(new Date()) +allData.get(i) + "次");
+//                            Log.e(TAG, "数据收集" + sdf.format(new Date()) +allData.get(i) + "次");
+//                        }
+//                    }
+//
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+            int count = (mAdapter.getCount() + 1);
+            lisdata.add(msg.obj.toString());
+            //PD=18   PD=18,0
+            if (msg.obj.toString().contains("PD")) {
+                String[] split = msg.obj.toString().split("=");
+                listBlood.add(new PDBean(count+"",Integer.valueOf(split[1])));
+                generateData();
+            }
+//            isBlow(msg);
+            isBlow30(msg);
+            serverDataList.add(msg.obj.toString());
+            mAdapter.add(msg.obj.toString() + "," + count);
+            mEasyRecyclerView.scrollToPosition(mAdapter.getCount());
+            mAdapter.notifyDataSetChanged();
+
+
+//            List<Map<String, Object>> maps = SQLiteHelper.getInstance().mUartDB.queryUserInfo(SQLiteHelper.getInstance().getDBInstance(), null);
+//            Logger.d("数据库中数据：" + new Gson().toJson(maps));
+        }
+    };
+
+    /**
+     * 每到16次的时候 检查是否呼气 没有呼气则语音提示
+     *
+     * @param msg
+     */
+    private void isBlow(Message msg) {
+        blowCount++;
+        blowList.add(msg.obj.toString());
+        if (blowCount == 16) {
+            for (int i = 0; i < blowList.size(); i++) {
+                if (!blowList.contains("Blow")) {
+                    //吹气播放
+                    MediaPlayer mediaPlayer = MediaPlayer.create(getActivity(), R.raw.blow);
+                    mediaPlayer.start();
+                    blowCount = 0;
+                    blowList.clear();
+                    Log.d("TAG", "handleMessage: timer 吹气吹气吹气吹气吹气");
+                }
+            }
+        }
+    }
+
+    /**
+     * 每到31次的时候 检查是否呼气 没有呼气则语音提示
+     * 每到32次的时候 检查是否呼气 没有呼气则语音提示
+     *
+     * @param msg
+     */
+    private void isBlow30(Message msg) {
+        blowCount++;
+        blowList.add(msg.obj.toString());
+
+        if (blowCount == 31) {
+            if (!blowList.get(30).contains("Blow")) {
+                Log.e("TAG", "onCreate: 第 " + blowCount + " 次吹气一次");
+                //吹气播放
+                MediaPlayer mediaPlayer = MediaPlayer.create(getActivity(), R.raw.blow);
+                mediaPlayer.start();
+            }
+        }
+        if (blowCount == 32) {
+            if (!blowList.get(31).contains("Blow")) {
+                Log.e("TAG", "onCreate: 第 " + blowCount + " 次吹气一次");
+                MediaPlayer mediaPlayer = MediaPlayer.create(getActivity(), R.raw.blow);
+                mediaPlayer.start();
+            }
+            blowCount = 0;
+            blowList.clear();
         }
     }
 
@@ -412,53 +665,6 @@ public class UARTControlFragment extends Fragment implements UARTActivity.Config
     }
 
 
-    @SuppressLint("HandlerLeak")
-    public Handler mHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-
-            Log.e(TAG, "数据回调: " + msg.obj.toString());
-            if (msg.obj.toString().equals("OK")) {
-                return;
-            }
-            if (msg.obj.toString().equals("error")) {
-                return;
-            }
-//            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-//            for (int i = 0; i < 3; i++) {
-//                try {
-//                    Thread.sleep(5 * 1000); //设置暂停的时间 5 秒
-//                    Log.e(TAG, "时间: "+sdf.format(new Date()) + "--循环执行第" + (i+1) + "次");
-//                    System.out.println(sdf.format(new Date()) + "--循环执行第" + (i+1) + "次");
-//
-//                    List<String> allData = mAdapter.getAllData();
-//
-//                    for (int i1 = 0; i1 < allData.size(); i1++) {
-//
-//                        if (allData.get(i).contains("PD")) {
-//                            System.out.println(sdf.format(new Date()) +allData.get(i) + "次");
-//                            Log.e(TAG, "数据收集" + sdf.format(new Date()) +allData.get(i) + "次");
-//                        }
-//                    }
-//
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-            int count = (mAdapter.getCount() + 1);
-            lisdata.add(msg.obj.toString());
-            serverDataList.add(msg.obj.toString());
-            mAdapter.add(msg.obj.toString() + "," + count);
-            mEasyRecyclerView.scrollToPosition(mAdapter.getCount());
-            mAdapter.notifyDataSetChanged();
-
-
-            List<Map<String, Object>> maps = SQLiteHelper.getInstance().mUartDB.queryUserInfo(SQLiteHelper.getInstance().getDBInstance(), null);
-            Logger.d("数据库中数据：" + new Gson().toJson(maps));
-        }
-    };
-
-
     @Override
     public void onStart() {
         super.onStart();
@@ -469,6 +675,7 @@ public class UARTControlFragment extends Fragment implements UARTActivity.Config
          */
         final Intent service = new Intent(getActivity(), UARTService.class);
         requireActivity().bindService(service, serviceConnection, 0); // we pass 0 as a flag so the service will not be created if not exists
+
     }
 
     @Override
@@ -486,15 +693,27 @@ public class UARTControlFragment extends Fragment implements UARTActivity.Config
     @Override
     public void onDestroy() {
         super.onDestroy();
+        if (myReceiver != null) {
+            requireActivity().unregisterReceiver(myReceiver);
+        }
         ((UARTActivity) requireActivity()).setConfigurationListener(null);
         if (timer != null)
             timer.cancel();
 
         if (uartInterface != null) {
+            HttpProvider.doGet(GlobalConstants.APP_BURIED_POINT + Constants.B_BLE_END + "," + bleService.getDeviceAddress(), null);
+
             uartInterface.send("<M>Stop</M>");
             uartInterface = null;
+
         }
-        if (bleService != null)
-            bleService.disconnect();
+        if (bleService != null) {
+            try {
+                bleService.disconnect();
+            } catch (Exception e) {
+            }
+        }
     }
+
+
 }

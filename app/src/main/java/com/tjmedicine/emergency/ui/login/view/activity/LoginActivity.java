@@ -15,6 +15,8 @@ import android.widget.TextView;
 
 import androidx.appcompat.widget.AppCompatCheckBox;
 
+import com.mob.MobSDK;
+import com.mob.PrivacyPolicy;
 import com.orhanobut.logger.Logger;
 import com.tjmedicine.emergency.R;
 import com.tjmedicine.emergency.common.base.BaseActivity;
@@ -59,6 +61,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
     AppCompatCheckBox appCompatCheckBox;
 
     private String captcha_key;
+    String url;
 
     @Override
     protected int setLayoutResourceID() {
@@ -104,11 +107,41 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
         appCompatCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked){
+                if (isChecked) {
                     mLogin.setEnabled(true);
-                }else {
+                } else {
                     mLogin.setEnabled(false);
                 }
+            }
+        });
+        // 异步方法查询隐私,locale可以为null或不设置，默认使用当前系统语言
+        MobSDK.getPrivacyPolicyAsync(MobSDK.POLICY_TYPE_TXT, new PrivacyPolicy.OnPolicyListener() {
+            @Override
+            public void onComplete(PrivacyPolicy data) {
+                if (data != null) {
+                    // 富文本内容
+                    String text = data.getContent();
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                // 请求失败
+            }
+        });
+
+        MobSDK.getPrivacyPolicyAsync(MobSDK.POLICY_TYPE_URL, new PrivacyPolicy.OnPolicyListener() {
+            @Override
+            public void onComplete(PrivacyPolicy data) {
+                if (data != null) {
+                    // 富文本内容
+                    url = data.getContent();
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                // 请求失败
             }
         });
     }
@@ -151,7 +184,6 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
                     }
                     mPhone.setText(stringBuilder.toString());
                     mPhone.setSelection(index);
-
                 }
             }
 
@@ -169,9 +201,9 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
                 break;
             case R.id.b_login:
                 boolean checked = appCompatCheckBox.isChecked();
-                if (checked){
+                if (checked) {
                     loginBefore();
-                }else {
+                } else {
                     mApp.shortToast("请勾选用户协议");
                 }
                 //mApp.shortToast("阅读并同意底部相关协议才能登录");
@@ -182,13 +214,13 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
             case R.id.tv_login_agreement_user_agreement:
                 Intent intent = new Intent(this, WebActivity.class);
                 intent.putExtra(WEB_KEY_URL, GlobalConstants.AGREEMENT_URL);
-                intent.putExtra(WEB_KEY_FLAG, "1");
+                intent.putExtra(WEB_KEY_FLAG, 1);
                 startActivity(intent);
                 break;
             case R.id.tv_login_agreement_privacyPolicy:
                 Intent intent1 = new Intent(this, WebActivity.class);
-                intent1.putExtra(WEB_KEY_URL, GlobalConstants.PRIVACYPOLICY_URL);
-                intent1.putExtra(WEB_KEY_FLAG, "1");
+                intent1.putExtra(WEB_KEY_URL, url);
+                intent1.putExtra(WEB_KEY_FLAG, 1);
                 startActivity(intent1);
                 break;
         }
@@ -287,7 +319,6 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener,
         finish();
         mApp.shortToast("登录成功~");
     }
-
 
 
     @Override

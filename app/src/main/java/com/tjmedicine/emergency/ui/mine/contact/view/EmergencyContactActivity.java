@@ -144,7 +144,7 @@ public class EmergencyContactActivity extends BaseActivity implements IContactVi
             int count = 5;
             int vi = count - contactBean.size();
             mCount.setText("已添加" + contactBean.size() + "位,还可以添加"+vi+"人");
-            mAdapter.addAll(contactBean);
+            mAdapter.update(contactBean);
         }
     }
 

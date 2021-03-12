@@ -20,17 +20,20 @@
   ~ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
   ~ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   -->
-<LinearLayout
-	style="?android:attr/buttonBarStyle"
-	xmlns:android="http://schemas.android.com/apk/res/android"
-	xmlns:tools="http://schemas.android.com/tools"
-	android:layout_width="match_parent"
-	android:layout_height="match_parent"
-	android:animateLayoutChanges="true"
-	android:orientation="vertical"
-	android:paddingTop="10dp">
+<LinearLayout style="?android:attr/buttonBarStyle"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
+    android:orientation="vertical"
+    android:paddingTop="10dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <include layout="@layout/base_title_layout"/>
 
 	<TextView
+
 		android:id="@+id/permission_rationale"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
@@ -41,6 +44,7 @@
 		android:visibility="gone"/>
 
 	<ListView
+        android:layout_marginTop="40dp"
 		android:id="@android:id/list"
 		android:layout_width="match_parent"
 		android:layout_height="0dp"
@@ -49,6 +53,21 @@
 		android:paddingStart="26dp"
 		android:scrollbarStyle="outsideOverlay"
 		tools:listitem="@layout/device_list_row"/>
+
+        <com.airbnb.lottie.LottieAnimationView
+            android:id="@+id/lav"
+            android:layout_marginTop="20dp"
+            android:layout_width="80dp"
+            android:layout_gravity="center"
+            android:layout_height="80dp"
+            app:lottie_autoPlay="true"
+            app:lottie_fileName="loading.json"
+            app:lottie_loop="true" />
+
+<!--        <TextView-->
+<!--            android:text="正在搜索中..."-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"/>-->
 
 	<androidx.appcompat.widget.AppCompatButton
 		android:background="@color/transparent"

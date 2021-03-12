@@ -6,6 +6,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 
+import com.mob.MobSDK;
+import com.mob.PrivacyPolicy;
 import com.tjmedicine.emergency.R;
 import com.tjmedicine.emergency.common.base.BaseActivity;
 import com.tjmedicine.emergency.common.base.OnMultiClickListener;
@@ -38,6 +40,7 @@ public class AboutActivity extends BaseActivity implements IVersionUpdateView {
     TextView mLoginAgreement;
     @BindView(R.id.tv_login_agreement_privacyPolicy)
     TextView mLoginAgreementPrivacy;
+    private String url;
 
     @Override
     protected int setLayoutResourceID() {
@@ -61,7 +64,7 @@ public class AboutActivity extends BaseActivity implements IVersionUpdateView {
             @Override
             public void onClick(View v) {
                 Intent intent1 = new Intent(AboutActivity.this, WebActivity.class);
-                intent1.putExtra(WEB_KEY_URL, GlobalConstants.PRIVACYPOLICY_URL);
+                intent1.putExtra(WEB_KEY_URL, url);
                 intent1.putExtra(WEB_KEY_FLAG, 1);
                 startActivity(intent1);
             }
@@ -85,6 +88,22 @@ public class AboutActivity extends BaseActivity implements IVersionUpdateView {
             @Override
             public void onMultiClick(View v) {
                 startActivity(CompanyProfileActivity.class);
+            }
+        });
+
+        // 异步方法查询隐私,locale可以为null或不设置，默认使用当前系统语言
+        MobSDK.getPrivacyPolicyAsync(MobSDK.POLICY_TYPE_URL, new PrivacyPolicy.OnPolicyListener() {
+            @Override
+            public void onComplete(PrivacyPolicy data) {
+                if (data != null) {
+                    // 富文本内容
+                    url = data.getContent();
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                // 请求失败
             }
         });
     }

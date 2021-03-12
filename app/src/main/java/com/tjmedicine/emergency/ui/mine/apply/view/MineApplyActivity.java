@@ -1,5 +1,6 @@
 package com.tjmedicine.emergency.ui.mine.apply.view;
 
+import android.os.Bundle;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
@@ -11,13 +12,16 @@ import com.bumptech.glide.Glide;
 import com.jude.easyrecyclerview.EasyRecyclerView;
 import com.jude.easyrecyclerview.adapter.BaseViewHolder;
 import com.jude.easyrecyclerview.adapter.RecyclerArrayAdapter;
+import com.tjmedicine.emergency.EmergencyApplication;
 import com.tjmedicine.emergency.R;
 import com.tjmedicine.emergency.common.base.Adapter;
 import com.tjmedicine.emergency.common.base.BaseActivity;
 import com.tjmedicine.emergency.common.base.ViewHolder;
+import com.tjmedicine.emergency.common.global.Constants;
 import com.tjmedicine.emergency.ui.bean.SignUpBean;
 import com.tjmedicine.emergency.ui.bean.TeachData;
 import com.tjmedicine.emergency.ui.mine.apply.presenter.MineApplyPresenter;
+import com.tjmedicine.emergency.ui.other.WebActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,13 +74,13 @@ public class MineApplyActivity extends BaseActivity implements IMineApplyView {
                     }
 
                     @Override
-                    public void setData(SignUpBean SignUpBean) {
-                        super.setData(SignUpBean);
-//                        tv_home_title.setText(data.getTitle());
-//                        tv_home_content.setText(data.getContent());
-//                        Glide.with(requireActivity())
-//                                .load("https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=2203305725,3918642026&fm=26&gp=0.jpg")
-//                                .into(riv_image);
+                    public void setData(SignUpBean data) {
+                        super.setData(data);
+                        tv_home_title.setText(data.getTitle());
+                        tv_home_content.setText(data.getContent());
+                        Glide.with(EmergencyApplication.getContext())
+                                .load(data.getImgUrl())
+                                .into(riv_image);
                     }
                 };
             }
@@ -102,11 +106,12 @@ public class MineApplyActivity extends BaseActivity implements IMineApplyView {
 //        });
 
 
-//        mAdapter.setOnItemClickListener(position -> {
-//            Bundle bundle = new Bundle();
-//            bundle.putInt("id", mAdapter.getItem(position).getId());
-//            startActivity(RecruitmentDetailActivity.class, bundle);
-//        });
+        mAdapter.setOnItemClickListener(position -> {
+            Bundle intent = new Bundle();
+            intent.putString(Constants.WEB_KEY_URL, mAdapter.getItem(position).getHttpUrl());
+            intent.putInt(Constants.WEB_KEY_FLAG, 1);
+            startActivity(WebActivity.class, intent);
+        });
 
     }
 

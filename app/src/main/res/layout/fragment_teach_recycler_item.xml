@@ -31,6 +31,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="这是一个标题"
+                android:maxLines="2"
+                android:ellipsize="end"
                 android:textColor="#ff333333"
                 android:textSize="16sp" />
 

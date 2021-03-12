@@ -22,6 +22,8 @@ import com.orhanobut.logger.AndroidLogAdapter;
 import com.orhanobut.logger.FormatStrategy;
 import com.orhanobut.logger.Logger;
 import com.orhanobut.logger.PrettyFormatStrategy;
+import com.pgyer.pgyersdk.PgyerSDKManager;
+import com.pgyer.pgyersdk.pgyerenum.FeatureEnum;
 
 import java.util.List;
 
@@ -139,6 +141,17 @@ public class EmergencyApplication extends MultiDexApplication {
                 }
             });
         }
+        MobPushReceiver();
+
+        init();
+    }
+
+    //初始化 蒲公英SDK
+    private static void init(){
+        new PgyerSDKManager.InitSdk()
+                .setContext(context) //设置上下问对象
+                .enable(FeatureEnum.CHECK_UPDATE)  //添加检查新版本
+                .build();
     }
 
     /**
@@ -154,6 +167,64 @@ public class EmergencyApplication extends MultiDexApplication {
                 .tag(LOGGER_TAG)
                 .build();
         Logger.addLogAdapter(new AndroidLogAdapter(formatStrategy));
+    }
+
+
+    private void MobPushReceiver() {
+        //防止多进程注册多次  可以在MainActivity或者其他页面注册MobPushReceiver
+        String processName = getProcessName(this);
+        if (getPackageName().equals(processName)) {
+            MobPush.addPushReceiver(new MobPushReceiver() {
+                @Override
+                public void onCustomMessageReceive(Context context, MobPushCustomMessage message) {
+                    //接收自定义消息(透传)
+                    System.out.println("onCustomMessageReceive:" + message.toString());
+                }
+
+                @Override
+                public void onNotifyMessageReceive(Context context, MobPushNotifyMessage message) {
+                    //接收通知消
+                    System.out.println("MobPush onNotifyMessageReceive:" + message.toString());
+                    Message msg = new Message();
+                    msg.what = 1;
+                    msg.obj = "Message Receive:" + message.toString();
+                    handler.sendMessage(msg);
+                }
+
+                @Override
+                public void onNotifyMessageOpenedReceive(Context context, MobPushNotifyMessage message) {
+                    //接收通知消息被点击事件
+                    System.out.println("MobPush onNotifyMessageOpenedReceive:" + message.toString());
+                    Message msg = new Message();
+                    msg.what = 1;
+                    msg.obj = "Click Message:" + message.toString();
+                    handler.sendMessage(msg);
+                }
+
+                @Override
+                public void onTagsCallback(Context context, String[] tags, int operation, int errorCode) {
+                    //接收tags的增改删查操作
+                    System.out.println("onTagsCallback:" + operation + "  " + errorCode);
+                }
+
+                @Override
+                public void onAliasCallback(Context context, String alias, int operation, int errorCode) {
+                    //接收alias的增改删查操作
+                    System.out.println("onAliasCallback:" + alias + "  " + operation + "  " + errorCode);
+                }
+            });
+
+            handler = new Handler(new Handler.Callback() {
+                @Override
+                public boolean handleMessage(Message msg) {
+                    if (msg.what == 1) {
+                        //Toast.makeText(MobSDK.getContext(), "回调信息\n" + (String) msg.obj, Toast.LENGTH_LONG).show();
+                        System.out.println("Callback Data:" + msg.obj);
+                    }
+                    return false;
+                }
+            });
+        }
     }
 
     private String getProcessName(Context context) {

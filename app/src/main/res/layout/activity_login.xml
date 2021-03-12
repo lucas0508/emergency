@@ -167,7 +167,8 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="30dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
                 android:layout_marginBottom="10dp">
 
                 <androidx.appcompat.widget.AppCompatCheckBox
@@ -178,29 +179,32 @@
                     android:theme="@style/MyLoginCheckBox" />
 
                 <TextView
+                    android:textSize="12sp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="勾选即表示同意" />
+                    android:text="我已阅读并同意" />
 
                 <TextView
+                    android:textSize="12sp"
                     android:id="@+id/tv_login_agreement_user_agreement"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:text="《用户协议》"
+                    android:text="用户协议及隐私政策"
                     android:textColor="#dc0977e5" />
 
                 <TextView
+                    android:textSize="12sp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="和" />
+                    android:text="/" />
 
                 <TextView
+                    android:textSize="12sp"
+                    android:visibility="visible"
                     android:id="@+id/tv_login_agreement_privacyPolicy"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:text="《隐私政策》"
+                    android:text="第三方服务和隐私政策"
                     android:textColor="#dc0977e5" />
             </LinearLayout>
 

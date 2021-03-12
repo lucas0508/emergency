@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -30,13 +31,17 @@ import com.tjmedicine.emergency.common.base.OnMultiClickListener;
 import com.tjmedicine.emergency.common.base.ViewHolder;
 import com.tjmedicine.emergency.common.bean.BannerBean;
 import com.tjmedicine.emergency.common.bean.TeachingBean;
+import com.tjmedicine.emergency.common.global.Constants;
+import com.tjmedicine.emergency.common.global.GlobalConstants;
 import com.tjmedicine.emergency.model.widget.RecycleViewDivider;
 import com.tjmedicine.emergency.ui.bean.TeachData;
+import com.tjmedicine.emergency.ui.other.WebActivity;
 import com.tjmedicine.emergency.ui.teach.presenter.BannerPresenter;
 import com.tjmedicine.emergency.ui.teach.presenter.TeachingPresenter;
 import com.tjmedicine.emergency.ui.teach.view.IBannerView;
 import com.tjmedicine.emergency.ui.teach.view.ITeachingView;
 import com.tjmedicine.emergency.ui.teach.view.TeachingDetailActivity;
+import com.tjmedicine.emergency.ui.teach.view.test;
 import com.tjmedicine.emergency.ui.uart.UARTActivity;
 
 import java.util.ArrayList;
@@ -62,6 +67,8 @@ public class TeachingFragment extends BaseFragment implements IBannerView, ITeac
     @BindView(R.id.banner)
     BGABanner bgaBanner;
     List<String> bannerList = new ArrayList<>();
+    List<String> bannerListUrl = new ArrayList<>();
+    List<String> bannerListType = new ArrayList<>();
     private Adapter<TeachingBean.ListBean> mAdapter;
 
     @Override
@@ -110,7 +117,7 @@ public class TeachingFragment extends BaseFragment implements IBannerView, ITeac
                     public void setData(TeachingBean.ListBean data) {
                         super.setData(data);
                         tv_home_title.setText(data.getTitle());
-                        tv_home_content.setText(data.getContent());
+                        tv_home_content.setText(data.getIntroduce());
                         Glide.with(requireActivity())
                                 .load(data.getBaseUrl())
                                 .into(riv_image);
@@ -130,7 +137,6 @@ public class TeachingFragment extends BaseFragment implements IBannerView, ITeac
                 teachingPresenter.findTeachingList(mAdapter.getNextPage());
             }
 
-
             @Override
             public void onMoreClick() {
             }
@@ -141,6 +147,7 @@ public class TeachingFragment extends BaseFragment implements IBannerView, ITeac
             Bundle bundle = new Bundle();
             bundle.putSerializable("teachingBean", mAdapter.getItem(position));
             startActivity(TeachingDetailActivity.class, bundle);
+//          startActivity(test.class, bundle);
         });
     }
 
@@ -161,12 +168,22 @@ public class TeachingFragment extends BaseFragment implements IBannerView, ITeac
         for (BannerBean url : bannerBeanList) {
             String imgUrl = url.getImgUrl();
             bannerList.add(imgUrl);
+            bannerListUrl.add(url.getHttpUrl());
+            bannerListType.add(url.getType());
         }
         bgaBanner.setData(bannerList, null);
         bgaBanner.setDelegate(new BGABanner.Delegate() {
             @Override
             public void onBannerItemClick(BGABanner banner, View itemView, @Nullable Object model, int position) {
-                Toast.makeText(banner.getContext(), "点击了" + position, Toast.LENGTH_SHORT).show();
+                //Toast.makeText(banner.getContext(), "点击了" + position, Toast.LENGTH_SHORT).show();
+                String url = bannerListUrl.get(position);
+                Bundle intent = new Bundle();
+                intent.putString(Constants.WEB_KEY_URL, url);
+                intent.putInt(Constants.WEB_KEY_FLAG, 1);
+                intent.putString(Constants.WEB_KEY_TYPE, bannerListType.get(position));
+                intent.putInt("activity_id", bannerBeanList.get(position).getActivityId());
+                intent.putString("play_url", bannerBeanList.get(position).getPlayUrl());
+                startActivity(WebActivity.class, intent);
             }
         });
     }
@@ -178,7 +195,6 @@ public class TeachingFragment extends BaseFragment implements IBannerView, ITeac
 
     @Override
     public void findTeachingSuccess(List<TeachingBean.ListBean> listBeans) {
-        Logger.d("data--》" + new Gson().toJson(listBeans));
         mAdapter.addAll(listBeans);
     }
 

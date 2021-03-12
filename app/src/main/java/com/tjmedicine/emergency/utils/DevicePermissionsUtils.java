@@ -100,13 +100,13 @@ public class DevicePermissionsUtils {
 //            permisstionList.add(Manifest.permission.CAMERA);
 //        }
         //sdk读权限
-        if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            permisstionList.add(Manifest.permission.READ_EXTERNAL_STORAGE);
-        }
-        //sdk写权限
-        if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            permisstionList.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        }
+//        if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+//            permisstionList.add(Manifest.permission.READ_EXTERNAL_STORAGE);
+//        }
+//        //sdk写权限
+//        if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+//            permisstionList.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+//        }
 //        读手机状态
 //        if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
 //            permisstionList.add(Manifest.permission.READ_PHONE_STATE);

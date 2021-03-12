@@ -274,7 +274,7 @@ public class UARTService extends BleProfileService implements UARTManagerCallbac
      */
     @SuppressWarnings("SameParameterValue")
     protected Notification createNotification(final int messageResId, final int defaults) {
-        Log.e(TAG, "createNotification: " + "通知*----------FeaturesActivity-----------------------------");
+//        Log.e(TAG, "createNotification: " + "通知*----------FeaturesActivity-----------------------------");
 //        final Intent parentIntent = new Intent(this, FeaturesActivity.class);
 //        parentIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 //        final Intent targetIntent = new Intent(this, UARTActivity.class);
@@ -291,7 +291,7 @@ public class UARTService extends BleProfileService implements UARTManagerCallbac
 //        builder.setSmallIcon(R.drawable.ic_stat_notify_uart);
 //        builder.setShowWhen(defaults != 0).setDefaults(defaults).setAutoCancel(true).setOngoing(true);
 //        builder.addAction(new NotificationCompat.Action(R.drawable.ic_action_bluetooth, getString(R.string.uart_notification_action_disconnect), disconnectAction));
-
+//
 //        return builder.build();
         return null;
     }

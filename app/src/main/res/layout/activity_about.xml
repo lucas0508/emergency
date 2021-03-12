@@ -52,6 +52,7 @@
     </LinearLayout>
 
     <LinearLayout
+        android:visibility="gone"
         android:id="@+id/company_profile"
         android:orientation="vertical"
         android:layout_marginStart="20dp"
@@ -121,7 +122,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="《用户协议》"
+            android:text="《用户协议和隐私政策》"
             android:textColor="#dc0977e5" />
 
         <TextView
@@ -130,7 +131,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="《隐私政策》"
+            android:text="《第三方服务和隐私政策》"
             android:textColor="#dc0977e5" />
 
 

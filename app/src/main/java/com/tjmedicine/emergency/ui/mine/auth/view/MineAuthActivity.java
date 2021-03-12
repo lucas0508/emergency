@@ -14,6 +14,9 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.lxj.xpopup.XPopup;
+import com.lxj.xpopupext.listener.CityPickerListener;
+import com.lxj.xpopupext.popup.CityPickerPopup;
 import com.orhanobut.logger.Logger;
 import com.tjmedicine.emergency.R;
 import com.tjmedicine.emergency.common.base.BaseActivity;
@@ -59,8 +62,11 @@ public class MineAuthActivity extends BaseActivity implements IAuthView {
     LinearLayout ll_review_no;
     @BindView(R.id.tv_refuse)
     TextView tv_refuse;
+    @BindView(R.id.tv_chooseAddress)
+    TextView tv_chooseAddress;
+
     private int selectIndex = 1;
-    private String imgIdCardFront,imgIdCardBack;
+    private String imgIdCardFront, imgIdCardBack;
 
     @Override
     protected int setLayoutResourceID() {
@@ -118,6 +124,26 @@ public class MineAuthActivity extends BaseActivity implements IAuthView {
 
             }
         });
+
+        tv_chooseAddress.setOnClickListener(new OnMultiClickListener() {
+            @Override
+            public void onMultiClick(View v) {
+                CityPickerPopup popup = new CityPickerPopup(MineAuthActivity.this);
+                popup.setCityPickerListener(new CityPickerListener() {
+                    @Override
+                    public void onCityConfirm(String province, String city, String area, View v) {
+                        tv_chooseAddress.setText(province + city + area);
+                    }
+
+                    @Override
+                    public void onCityChange(String province, String city, String area) {
+                    }
+                });
+                new XPopup.Builder(MineAuthActivity.this)
+                        .asCustom(popup)
+                        .show();
+            }
+        });
     }
 
     private void submit() {
@@ -126,8 +152,12 @@ public class MineAuthActivity extends BaseActivity implements IAuthView {
             mApp.shortToast("请输入姓名!");
             return;
         }
+        if (TextUtils.isEmpty(tv_chooseAddress.getText().toString().trim())) {
+            mApp.shortToast("请选择常住地址!");
+            return;
+        }
         if (TextUtils.isEmpty(et_address.getText().toString().trim())) {
-            mApp.shortToast("请输入常住地址!");
+            mApp.shortToast("请输入详细地址!");
             return;
         }
 
@@ -141,8 +171,8 @@ public class MineAuthActivity extends BaseActivity implements IAuthView {
         }
         mApp.getLoadingDialog().show();
         authPresenter.goRealAuth(et_name.getText().toString().trim(),
-                et_address.getText().toString().trim(),
-                imgIdCardFront,imgIdCardBack);
+                tv_chooseAddress.getText().toString().trim() + et_address.getText().toString().trim(),
+                imgIdCardFront, imgIdCardBack);
     }
 
     @Override
@@ -178,14 +208,14 @@ public class MineAuthActivity extends BaseActivity implements IAuthView {
                     ll_review_no.setVisibility(View.GONE);
                 }
             });
-        } else if (type == 4){
+        } else if (type == 4) {
             scroview.setVisibility(View.VISIBLE);
-            if (!TextUtils.isEmpty(volunteerBeans.getIdUpUrl())){
-                imgIdCardFront=volunteerBeans.getIdUpUrl();
+            if (!TextUtils.isEmpty(volunteerBeans.getIdUpUrl())) {
+                imgIdCardFront = volunteerBeans.getIdUpUrl();
                 Glide.with(this).load(volunteerBeans.getIdUpUrl()).into(iv_id_card_front);
             }
-            if (!TextUtils.isEmpty(volunteerBeans.getIdDownUrl())){
-                imgIdCardBack=volunteerBeans.getIdDownUrl();
+            if (!TextUtils.isEmpty(volunteerBeans.getIdDownUrl())) {
+                imgIdCardBack = volunteerBeans.getIdDownUrl();
                 Glide.with(this).load(volunteerBeans.getIdDownUrl()).into(iv_id_card_back);
             }
         }
@@ -248,7 +278,7 @@ public class MineAuthActivity extends BaseActivity implements IAuthView {
                 QiNiuUtils.getInstance().upload(s, new QiNiuUtils.UploadResult() {
                     @Override
                     public void success(String path) {
-                        Logger.d("图片返回路径+"+path);
+                        Logger.d("图片返回路径+" + path);
                         mApp.getLoadingDialog().hide();
                         try {
                             if (selectIndex == 1) {

@@ -12,7 +12,7 @@ public class LogOutModel extends BaseModel implements ILogOutModel {
     @Override
     public void logout(OnCallbackListener listener) {
         String url = GlobalConstants.APP_LOGOUT;
-        HttpProvider.doGet(url, responseText -> {
+        HttpProvider.doPost(url,null, responseText -> {
             executeCallback(responseText,null, listener);
         });
     }

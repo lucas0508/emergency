@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.net.http.SslError;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -17,6 +18,7 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -27,9 +29,14 @@ import androidx.annotation.Nullable;
 import com.orhanobut.logger.Logger;
 import com.tjmedicine.emergency.R;
 import com.tjmedicine.emergency.common.base.BaseActivity;
+import com.tjmedicine.emergency.common.base.OnMultiClickListener;
 import com.tjmedicine.emergency.common.global.Constants;
 import com.tjmedicine.emergency.model.widget.CustomWebView;
+import com.tjmedicine.emergency.ui.bean.SignUpBean;
+import com.tjmedicine.emergency.ui.mine.apply.presenter.MineApplyPresenter;
+import com.tjmedicine.emergency.ui.mine.apply.view.IMineApplyView;
 
+import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import butterknife.BindView;
@@ -40,7 +47,10 @@ import static com.tjmedicine.emergency.common.global.Constants.WEB_KEY_URL;
  * 特别注意：JS代码调用一定要在 onPageFinished（） 回调之后才能调用，否则不会调用。
  * onPageFinished()属于WebViewClient类的方法，主要在页面加载结束时调用
  */
-public class WebActivity extends BaseActivity implements View.OnClickListener {
+public class WebActivity extends BaseActivity implements View.OnClickListener, IMineApplyView {
+
+    private MineApplyPresenter mineApplyPresenter = new MineApplyPresenter(this);
+
 
     private static Bitmap bitmap;
     private static CopyOnWriteArrayList<Bitmap> bitmapList = new CopyOnWriteArrayList<>();
@@ -54,14 +64,31 @@ public class WebActivity extends BaseActivity implements View.OnClickListener {
     RelativeLayout mBaseLayout;
     @BindView(R.id.ib_close)
     ImageButton mClose;
+    @BindView(R.id.btn_apply)
+    Button btn_apply;
+
+
     private String mUrl;
     private int mFlag = 0;
+    private int activity_id;
+    /*区别跳转来的是 报名链接 or 直播链接 */
+    private String mType = "";
+    private String play_url;
+
 
     @Override
     protected void initView() {
 
         mTitle.setTextColor(Color.BLACK);
         mClose.setImageResource(R.mipmap.icon_back);
+
+        btn_apply.setOnClickListener(new OnMultiClickListener() {
+            @Override
+            public void onMultiClick(View v) {
+                mApp.getLoadingDialog().show();
+                mineApplyPresenter.signUp(String.valueOf(activity_id));
+            }
+        });
     }
 
     @Override
@@ -116,11 +143,11 @@ public class WebActivity extends BaseActivity implements View.OnClickListener {
             @Override
             public void onReceivedTitle(WebView view, String title) {
                 super.onReceivedTitle(view, title);
-                if (mFlag == 1){
+                if (mFlag == 1) {
                     mTitle.setText(title);
-                }else if (mFlag==2){
-                    mTitle.setText("参考价");
-                }else {
+                } else if (mFlag == 2) {
+                    mTitle.setText(title);
+                } else {
                     mTitle.setText("详情");
                 }
             }
@@ -140,8 +167,9 @@ public class WebActivity extends BaseActivity implements View.OnClickListener {
             WebView.setWebContentsDebuggingEnabled(true);
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            if (0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE))
-            { WebView.setWebContentsDebuggingEnabled(true); }
+            if (0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE)) {
+                WebView.setWebContentsDebuggingEnabled(true);
+            }
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             webSettings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
@@ -199,12 +227,23 @@ public class WebActivity extends BaseActivity implements View.OnClickListener {
         mUrl = getIntent().getStringExtra(WEB_KEY_URL);
         Logger.d(mUrl);
         mFlag = getIntent().getIntExtra(Constants.WEB_KEY_FLAG, 0);
+        mType = getIntent().getStringExtra(Constants.WEB_KEY_TYPE);
+        activity_id = getIntent().getIntExtra("activity_id", 0);
+        play_url = getIntent().getStringExtra("play_url");
+        ;
         if (mUrl != null) {
             initWebView();
             mWebView.loadUrl(mUrl);
         } else {
             mApp.shortToast("网址加载失败！");
             finish();
+        }
+
+        //1.线下活动，2.直播，3.其他
+        if (!TextUtils.isEmpty(mType) && mType.equals("1")) {
+            btn_apply.setVisibility(View.VISIBLE);
+        } else if (!TextUtils.isEmpty(mType) && mType.equals("2")) {
+
         }
     }
 
@@ -233,5 +272,28 @@ public class WebActivity extends BaseActivity implements View.OnClickListener {
                 }
             }
         });
+    }
+
+    @Override
+    public void findSignUpSuccess(List<SignUpBean> contactBean) {
+
+    }
+
+    @Override
+    public void findSignUpFail(String info) {
+
+    }
+
+    @Override
+    public void signUpSuccess() {
+        mApp.getLoadingDialog().hide();
+        mApp.shortToast("报名成功！");
+        btn_apply.setEnabled(false);
+    }
+
+    @Override
+    public void signUpFail(String info) {
+        mApp.getLoadingDialog().hide();
+        mApp.shortToast(info);
     }
 }

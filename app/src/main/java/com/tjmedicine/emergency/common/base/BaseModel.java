@@ -12,10 +12,7 @@ import com.tjmedicine.emergency.utils.GsonUtils;
 
 import java.lang.reflect.Type;
 
-/**
- * @Date on 2019/1/8.
- * @Author by xrf05.
- */
+
 public class BaseModel {
    
    

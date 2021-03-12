@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
@@ -16,15 +17,22 @@ import androidx.appcompat.widget.AppCompatCheckBox;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.lxj.xpopup.XPopup;
+import com.lxj.xpopupext.listener.CityPickerListener;
+import com.lxj.xpopupext.popup.CityPickerPopup;
 import com.tjmedicine.emergency.R;
 import com.tjmedicine.emergency.common.base.BaseActivity;
 import com.tjmedicine.emergency.common.base.OnMultiClickListener;
 import com.tjmedicine.emergency.common.bean.VolunteerBean;
 import com.tjmedicine.emergency.common.cache.SharedPreferences.UserInfo;
+import com.tjmedicine.emergency.common.global.Constants;
+import com.tjmedicine.emergency.common.global.GlobalConstants;
 import com.tjmedicine.emergency.common.net.QiNiuUtils;
 import com.tjmedicine.emergency.model.takePhoto.PhotoUtils;
 import com.tjmedicine.emergency.model.widget.SelectPicDialog;
+import com.tjmedicine.emergency.ui.mine.auth.view.MineAuthActivity;
 import com.tjmedicine.emergency.ui.mine.volunteer.presenter.ApplyVolunteerPresenter;
+import com.tjmedicine.emergency.ui.other.WebActivity;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -42,7 +50,7 @@ public class ApplyVolunteerActivity extends BaseActivity implements IApplyVolunt
     @BindView(R.id.et_phone)
     TextView mPhone;
     @BindView(R.id.et_address)
-    TextView mAddress;
+    EditText mAddress;
     @BindView(R.id.tv_user)
     RadioButton mUser;
     @BindView(R.id.tv_doctor)
@@ -71,8 +79,10 @@ public class ApplyVolunteerActivity extends BaseActivity implements IApplyVolunt
     LinearLayout ll_review_no;
     @BindView(R.id.tv_refuse)
     TextView tv_refuse;
-
-
+    @BindView(R.id.tv_chooseAddress)
+    TextView tv_chooseAddress;
+    @BindView(R.id.tv_121_agreement)
+    TextView tv_121_agreement;
     String imgIdCardFront = "";
     String imgIdCardBack = "";
     String imgCardiopulmonaryResuscitation = ""; //心肺复苏证
@@ -205,6 +215,39 @@ public class ApplyVolunteerActivity extends BaseActivity implements IApplyVolunt
             }
         });
 
+        tv_chooseAddress.setOnClickListener(new OnMultiClickListener() {
+            @Override
+            public void onMultiClick(View v) {
+                CityPickerPopup popup = new CityPickerPopup(ApplyVolunteerActivity.this);
+                popup.setCityPickerListener(new CityPickerListener() {
+                    @Override
+                    public void onCityConfirm(String province, String city, String area, View v) {
+                        tv_chooseAddress.setText(province + city + area);
+                    }
+
+                    @Override
+                    public void onCityChange(String province, String city, String area) {
+                    }
+                });
+                new XPopup.Builder(ApplyVolunteerActivity.this)
+                        .asCustom(popup)
+                        .show();
+            }
+        });
+
+        /**
+         * 暂未提供志愿者须知
+         */
+        tv_121_agreement.setOnClickListener(new OnMultiClickListener() {
+            @Override
+            public void onMultiClick(View v) {
+                //点击代码
+                Intent intent = new Intent(ApplyVolunteerActivity.this, WebActivity.class);
+                intent.putExtra(Constants.WEB_KEY_URL, "");
+                intent.putExtra(Constants.WEB_KEY_FLAG, 1);
+                startActivity(intent);
+            }
+        });
     }
 
 
@@ -213,10 +256,15 @@ public class ApplyVolunteerActivity extends BaseActivity implements IApplyVolunt
             mApp.shortToast("请输入姓名!");
             return;
         }
-        if (TextUtils.isEmpty(mAddress.getText().toString().trim())) {
-            mApp.shortToast("请输入常住地址!");
+        if (TextUtils.isEmpty(tv_chooseAddress.getText().toString().trim())) {
+            mApp.shortToast("请选择常住地址!");
             return;
         }
+        if (TextUtils.isEmpty(mAddress.getText().toString().trim())) {
+            mApp.shortToast("请输入详细地址!");
+            return;
+        }
+
         imgIdCardFront = "https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fimg1.gtimg.com%2Ffinance%2Fpics%2Fhv1%2F61%2F0%2F634%2F41225911.jpg&refer=http%3A%2F%2Fimg1.gtimg.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1611821938&t=fb0830a4b02e3b7480f5abfce706df4a";
         imgIdCardBack = "https://ss1.bdstatic.com/70cFuXSh_Q1YnxGkpoWK1HF6hhy/it/u=2349422245,3515729816&fm=26&gp=0.jpg";
         imgDoctorsCertificate = "https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=4094239006,461086539&fm=11&gp=0.jpg";
@@ -245,7 +293,7 @@ public class ApplyVolunteerActivity extends BaseActivity implements IApplyVolunt
                 return;
             }
         }
-        objectMap.put("username", mName.getText().toString().trim());
+        objectMap.put("username", tv_chooseAddress.getText().toString().trim() + mName.getText().toString().trim());
         objectMap.put("volunteerAddress", mAddress.getText().toString().trim());
         objectMap.put("idUpUrl", imgIdCardFront);
         objectMap.put("idDownUrl", imgIdCardBack);
@@ -291,14 +339,14 @@ public class ApplyVolunteerActivity extends BaseActivity implements IApplyVolunt
                     ll_review_no.setVisibility(View.GONE);
                 }
             });
-        } else if (type == 4){
+        } else if (type == 4) {
             scroview.setVisibility(View.VISIBLE);
-            if (!TextUtils.isEmpty(volunteerBean.getIdUpUrl())){
-                imgIdCardFront=volunteerBean.getIdUpUrl();
+            if (!TextUtils.isEmpty(volunteerBean.getIdUpUrl())) {
+                imgIdCardFront = volunteerBean.getIdUpUrl();
                 Glide.with(this).load(volunteerBean.getIdUpUrl()).into(iv_id_card_front);
             }
-            if (!TextUtils.isEmpty(volunteerBean.getIdDownUrl())){
-                imgIdCardBack=volunteerBean.getIdDownUrl();
+            if (!TextUtils.isEmpty(volunteerBean.getIdDownUrl())) {
+                imgIdCardBack = volunteerBean.getIdDownUrl();
                 Glide.with(this).load(volunteerBean.getIdDownUrl()).into(iv_id_card_back);
             }
         }

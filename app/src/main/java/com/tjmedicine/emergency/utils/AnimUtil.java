@@ -106,6 +106,21 @@ public class AnimUtil {
         scaleAnim2.start();
     }
 
+    public static void starAnim2(View view) {
+        ObjectAnimator scaleAnim1 = ObjectAnimator.ofFloat(view, "scaleX", 0.5f, 1.0f);
+        // 设置ScaleAnim1动画持续时间
+        scaleAnim1.setDuration(1000);
+        // 设置ScaleAnim1动画的插值方式：减速插值
+        scaleAnim1.setInterpolator(new DecelerateInterpolator());
+        ObjectAnimator scaleAnim2 = ObjectAnimator.ofFloat(view, "scaleY", 0.5f, 1.0f);
+        // 设置ScaleAnim2动画持续时间
+        scaleAnim2.setDuration(1200);
+        // 设置ScaleAnim2动画的插值方式：减速插值
+        scaleAnim2.setInterpolator(new DecelerateInterpolator());
+        scaleAnim1.start();
+        scaleAnim2.start();
+    }
+
     public static void scaleUpDown(View view, float start) {
         ObjectAnimator scaleAnim = ObjectAnimator.ofFloat(view, "translationY", start);
         // 设置ScaleAnim2动画持续时间

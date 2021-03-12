@@ -120,6 +120,25 @@
                     android:layout_height="wrap_content">
 
                     <TextView
+                        android:id="@+id/tv_verified"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="10dp"
+                        android:layout_weight="10"
+                        android:drawableTop="@mipmap/me_icon_volunteers"
+                        android:drawablePadding="4dp"
+                        android:gravity="center"
+                        android:text="实名认证"
+                        android:textSize="14sp" />
+
+                    <View
+                        android:layout_width="1dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginBottom="10dp"
+                        android:background="#EEEEEE" />
+
+                    <TextView
                         android:id="@+id/tv_apply_volunteer"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -155,47 +174,7 @@
 
             </androidx.cardview.widget.CardView>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="40dp"
-                android:orientation="vertical">
 
-                <LinearLayout
-                    android:id="@+id/ll_my_apply"
-                    android:layout_width="match_parent"
-                    android:layout_height="45dp"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_marginLeft="20dp"
-                        android:layout_weight="1"
-                        android:drawableLeft="@mipmap/icon_sign_up"
-                        android:drawablePadding="6dp"
-                        android:gravity="center_vertical"
-                        android:text="我的报名"
-                        android:textColor="#ff333333"
-                        android:textSize="14sp" />
-
-                    <ImageView
-                        android:layout_width="30dp"
-                        android:layout_height="10dp"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginRight="10dp"
-                        android:background="#FFFFFF"
-                        android:src="@mipmap/me_right" />
-
-                </LinearLayout>
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginRight="10dp"
-                    android:background="#ffe4e2e2" />
-            </LinearLayout>
 
 
             <LinearLayout
@@ -205,6 +184,7 @@
                 android:orientation="vertical">
 
                 <LinearLayout
+                    android:visibility="gone"
                     android:id="@+id/ll_my_verified"
                     android:layout_width="match_parent"
                     android:layout_height="45dp"
@@ -288,6 +268,47 @@
                     android:background="#ffe4e2e2" />
             </LinearLayout>
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:id="@+id/ll_my_apply"
+                    android:layout_width="match_parent"
+                    android:layout_height="45dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginLeft="20dp"
+                        android:layout_weight="1"
+                        android:drawableLeft="@mipmap/icon_sign_up"
+                        android:drawablePadding="6dp"
+                        android:gravity="center_vertical"
+                        android:text="我的参与"
+                        android:textColor="#ff333333"
+                        android:textSize="14sp" />
+
+                    <ImageView
+                        android:layout_width="30dp"
+                        android:layout_height="10dp"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginRight="10dp"
+                        android:background="#FFFFFF"
+                        android:src="@mipmap/me_right" />
+
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:background="#ffe4e2e2" />
+            </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/ll_about_us"

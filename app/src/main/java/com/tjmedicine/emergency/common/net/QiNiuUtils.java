@@ -77,7 +77,7 @@ public class QiNiuUtils {
      * 获取token
      */
     private void getToken() {
-        HttpProvider.doGet(GlobalConstants.BASE_QI_NIU_URL_TOKEN+"/mobile/file/uptoken", getTokenCallback);
+        HttpProvider.doGet(GlobalConstants.BASE_SERVER_+"/mobile/file/uptoken", getTokenCallback);
 //        HttpProvider.doGet("http://192.168.1.142:8096/app/qiniu/getQiniuToken", getTokenCallback);
     }
 

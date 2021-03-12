@@ -23,19 +23,18 @@
             android:textColor="#333333"
             android:textSize="18sp" />
 
-        <TextView
-            android:id="@+id/tv_common_right"
+        <ImageView
+            android:id="@+id/iv_common_right"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:layout_centerInParent="true"
-            android:gravity="center"
-            android:paddingRight="16dp"
-            android:textColor="#333333" />
+            android:src="@mipmap/icon_message"
+            android:paddingRight="16dp" />
 
 
     </RelativeLayout>
+
+
 
     <com.amap.api.maps.TextureMapView
         android:id="@+id/map"
@@ -43,11 +42,21 @@
         android:layout_height="match_parent" >
     </com.amap.api.maps.TextureMapView>
 
+    <ImageView
+        android:layout_centerHorizontal="true"
+        android:id="@+id/iv_bg"
+        android:layout_marginTop="10dp"
+        android:layout_below="@+id/rl_base_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@mipmap/notice_bg"/>
+
+
     <LinearLayout
         android:layout_marginEnd="12dp"
-        android:layout_marginTop="28dp"
+        android:layout_marginTop="20dp"
         android:layout_alignParentEnd="true"
-        android:layout_below="@+id/rl_base_layout"
+        android:layout_below="@+id/iv_bg"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical">
@@ -86,14 +95,13 @@
 
     <ImageView
         android:id="@+id/iv_location"
-        android:visibility="gone"
+        android:visibility="visible"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_margin="10dp"
         android:layout_alignParentBottom="true"
-        android:src="@mipmap/icon_dummy"/>
-
+        android:src="@mipmap/icon_dingwei"/>
 </RelativeLayout>
 
 

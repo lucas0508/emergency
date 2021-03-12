@@ -12,5 +12,21 @@ public interface ClusterItem {
      *
      * @return
      */
-     LatLng getPosition();
+    LatLng getPosition();
+
+    /**
+     * 类型    设备  志愿者  转运车   医生
+     */
+    int getMapRole();
+
+    /**
+     * 志愿者名字
+     * @return
+     */
+    String getTitleName();
+
+    /**
+     * 距离
+     */
+    String getAddress();
 }

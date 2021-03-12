@@ -31,7 +31,7 @@ public class Cluster {
         mClusterItems.add(clusterItem);
     }
 
-    int getClusterCount() {
+    public int getClusterCount() {
         return mClusterItems.size();
     }
 

@@ -20,6 +20,28 @@ public class BannerBean {
     private String createAt;
     private int sort;
     private int ifDel;
+    /**
+     * 1.线下活动，2.直播，3.其他
+     */
+    private String type;
+
+    private String playUrl;
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getPlayUrl() {
+        return playUrl;
+    }
+
+    public void setPlayUrl(String playUrl) {
+        this.playUrl = playUrl;
+    }
 
     public int getId() {
         return id;

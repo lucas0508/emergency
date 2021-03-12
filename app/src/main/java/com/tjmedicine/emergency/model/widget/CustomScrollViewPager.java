@@ -9,10 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.viewpager.widget.ViewPager;
 
-/**
- * @Date on 2019/1/11.
- * @Author by xrf05.
- */
+
 public class CustomScrollViewPager extends ViewPager {
     //是否可以左右滑动？true 可以，像Android原生ViewPager一样。
     // false 禁止ViewPager左右滑动。

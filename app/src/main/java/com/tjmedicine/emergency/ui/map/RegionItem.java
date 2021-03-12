@@ -9,9 +9,14 @@ import com.amap.api.maps.model.LatLng;
 public class RegionItem implements ClusterItem {
     private LatLng mLatLng;
     private String mTitle;
-    public RegionItem(LatLng latLng, String title) {
-        mLatLng=latLng;
-        mTitle=title;
+    private int mapRole;
+    private String address;
+
+    public RegionItem(LatLng latLng, String title, int mapRole, String address) {
+        mLatLng = latLng;
+        mTitle = title;
+        this.mapRole = mapRole;
+        this.address = address;
     }
 
     @Override
@@ -19,8 +24,21 @@ public class RegionItem implements ClusterItem {
         // TODO Auto-generated method stub
         return mLatLng;
     }
-    public String getTitle(){
+
+    @Override
+    public int getMapRole() {
+        return mapRole;
+    }
+
+    @Override
+    public String getTitleName() {
         return mTitle;
     }
+
+    @Override
+    public String getAddress() {
+        return address;
+    }
+
 
 }

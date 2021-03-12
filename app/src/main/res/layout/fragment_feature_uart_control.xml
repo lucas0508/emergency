@@ -63,6 +63,7 @@
             android:layout_centerInParent="true"
             android:layout_centerHorizontal="true"
             android:background="@null"
+            android:visibility="gone"
             android:onClick="onConnectClicked"
             android:paddingEnd="10dp"
             android:text="点击连接模拟人" />
@@ -78,6 +79,15 @@
         android:layout_marginTop="30dp"
         android:src="@mipmap/mnr" />
 
+
+    <lecho.lib.hellocharts.view.LineChartView
+        android:id="@+id/chart"
+        android:layout_below="@+id/mmr"
+        android:layout_width="match_parent"
+        android:layout_height="200dp" />
+
+
+
     <TextView
         android:layout_marginStart="20dp"
         android:layout_width="wrap_content"
@@ -85,11 +95,13 @@
         android:layout_below="@+id/mmr"
         android:layout_marginTop="10dp"
         android:text="实时数据"
+        android:visibility="gone"
         android:textColor="#ff333333"
         android:textSize="20sp" />
 
     <com.jude.easyrecyclerview.EasyRecyclerView
         android:id="@+id/recycler_view"
+        android:visibility="gone"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/mmr"

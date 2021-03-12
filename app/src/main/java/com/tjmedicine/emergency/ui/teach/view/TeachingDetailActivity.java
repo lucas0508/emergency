@@ -1,17 +1,15 @@
 package com.tjmedicine.emergency.ui.teach.view;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Configuration;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Matrix;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LevelListDrawable;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.text.Html;
+import android.text.Spannable;
 import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
@@ -34,6 +32,7 @@ import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
+import com.orhanobut.logger.Logger;
 import com.shuyu.gsyvideoplayer.GSYVideoManager;
 import com.shuyu.gsyvideoplayer.builder.GSYVideoOptionBuilder;
 import com.shuyu.gsyvideoplayer.listener.GSYSampleCallBack;
@@ -46,12 +45,6 @@ import com.tjmedicine.emergency.common.bean.TeachingBean;
 import com.tjmedicine.emergency.model.widget.CustomWebView;
 import com.zzhoujay.richtext.RichText;
 import com.zzhoujay.richtext.callback.OnUrlClickListener;
-
-
-import java.io.Serializable;
-import java.lang.reflect.Field;
-import java.net.URL;
-
 import butterknife.BindView;
 
 public class TeachingDetailActivity extends BaseActivity {
@@ -67,7 +60,6 @@ public class TeachingDetailActivity extends BaseActivity {
     TextView mTime;
     @BindView(R.id.tv_Caption)
     TextView mCaption;
-
 
 
     private boolean isPlay;
@@ -89,12 +81,18 @@ public class TeachingDetailActivity extends BaseActivity {
         mCaption.setText(teachingBean.getTitle());
         mTime.setText(teachingBean.getCreateAt());
 
-        playVideo(teachingBean.getPlayUrl());
+        Logger.d("tupian:" + teachingBean.getContent());
+
+
+        if (!TextUtils.isEmpty(teachingBean.getPlayUrl())) {
+            detailPlayer.setVisibility(View.VISIBLE);
+            playVideo(teachingBean.getPlayUrl());
+        }
 
 
         RichText.initCacheDir(this);
         RichText.debugMode = true;
-        RichText.from(teachingBean.getContent())
+        RichText.fromHtml(teachingBean.getContent())
                 .urlClick(new OnUrlClickListener() {
                     @Override
                     public boolean urlClicked(String url) {
@@ -106,7 +104,14 @@ public class TeachingDetailActivity extends BaseActivity {
                     }
                 })
                 .into(mContent);
+
+        //       DownLoadUtil.setHtmlText(mContent,teachingBean.getContent(),200,200);
     }
+
+//--------------------------------------------------------------
+
+
+//--------------------------------------------------------------
 
 
     private void playVideo(String url1) {
@@ -139,7 +144,7 @@ public class TeachingDetailActivity extends BaseActivity {
                 .setNeedLockFull(true)
                 .setUrl(url)
                 .setCacheWithPlay(false)
-                .setVideoTitle("测试视频")
+                .setVideoTitle(teachingBean.getTitle())
                 .setVideoAllCallBack(new GSYSampleCallBack() {
                     @Override
                     public void onPrepared(String url, Object... objects) {
@@ -240,4 +245,6 @@ public class TeachingDetailActivity extends BaseActivity {
             detailPlayer.onConfigurationChanged(this, newConfig, orientationUtils, true, true);
         }
     }
+
+
 }

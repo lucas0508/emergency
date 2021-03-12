@@ -50,6 +50,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.google.gson.Gson;
 import com.jude.easyrecyclerview.EasyRecyclerView;
 import com.jude.easyrecyclerview.adapter.BaseViewHolder;
+import com.lxj.xpopup.XPopup;
 import com.orhanobut.logger.Logger;
 import com.tjmedicine.emergency.EmergencyApplication;
 import com.tjmedicine.emergency.R;
@@ -57,6 +58,7 @@ import com.tjmedicine.emergency.common.base.Adapter;
 import com.tjmedicine.emergency.common.base.OnMultiClickListener;
 import com.tjmedicine.emergency.common.base.ViewHolder;
 import com.tjmedicine.emergency.common.cache.db.SQLiteHelper;
+import com.tjmedicine.emergency.common.dialog.CustomDjsFullScreenPopup;
 import com.tjmedicine.emergency.common.dialog.DialogManage;
 import com.tjmedicine.emergency.common.dialog.TaskSucDialog;
 import com.tjmedicine.emergency.ui.uart.data.presenter.IUARTControlView;
@@ -98,6 +100,8 @@ public class UARTControlScoreFragment extends Fragment implements UARTActivity.C
     private UARTService.UARTBinder bleService;
     private UARTControlPresenter uartControlPresenter = new UARTControlPresenter(this);
     List<String> serverDataList;
+    private CustomDjsFullScreenPopup customDjsFullScreenPopup;
+
     @Override
     public void onAttach(@NonNull final Context context) {
         super.onAttach(context);
@@ -138,8 +142,6 @@ public class UARTControlScoreFragment extends Fragment implements UARTActivity.C
             bleService = (UARTService.UARTBinder) service;
             uartInterface = bleService;
             tv_connect.setText("关闭连接");
-
-
         }
 
 
@@ -199,10 +201,10 @@ public class UARTControlScoreFragment extends Fragment implements UARTActivity.C
                 if (null != uartInterface) {
                     mStartRobot.setVisibility(View.GONE);
                     tv_notice.setVisibility(View.GONE);
-                    SoundPlayUtils.play(5);
-                    GifLoadOneTimeGif.loadOneTimeGif(requireActivity(), R.drawable.countdown, mCountdownView, 1, new GifLoadOneTimeGif.GifListener() {
+                    customDjsFullScreenPopup = new CustomDjsFullScreenPopup(requireActivity(), new CustomDjsFullScreenPopup.OnMyCompletionListener() {
                         @Override
-                        public void gifPlayComplete() {
+                        public void onClick() {
+                            customDjsFullScreenPopup.dismiss();
                             //播放完成回调
                             if (null != uartInterface) {
                                 uartInterface.send("<M>Start</M>");
@@ -210,10 +212,11 @@ public class UARTControlScoreFragment extends Fragment implements UARTActivity.C
                                 startTimer();
                             }
                             liscount = new ArrayList<>();
-                            lisdata = new ArrayList<>();
+                            //lisdata = new ArrayList<>();
                             mAdapter.clear();
                         }
                     });
+                    new XPopup.Builder(requireActivity()).asCustom(customDjsFullScreenPopup).show();
 
                 } else {
                     ToastUtils.showTextToas(requireActivity(), "请连接模拟人后在点击开始测试哦~");
@@ -240,7 +243,6 @@ public class UARTControlScoreFragment extends Fragment implements UARTActivity.C
                 if (null != uartInterface) {
                     uartInterface.send("<M>Stop</M>");
                 }
-
             }
         }).start();
     }
@@ -294,10 +296,10 @@ public class UARTControlScoreFragment extends Fragment implements UARTActivity.C
 
 
     @Override
-    public void postUARTDataSuccess(String score) {
+    public void postUARTDataSuccess(Double score) {
         mApp.getLoadingDialog().hide();
-        final TaskSucDialog taskSucDialog = new TaskSucDialog(EmergencyApplication.getContext());
-        taskSucDialog.setTaskScore(Integer.parseInt(score));
+        final TaskSucDialog taskSucDialog = new TaskSucDialog(requireActivity());
+        taskSucDialog.setTaskScore(score);
         taskSucDialog.setTaskClose(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -335,10 +337,10 @@ public class UARTControlScoreFragment extends Fragment implements UARTActivity.C
             String data = intent.getStringExtra(Intent.EXTRA_TEXT);
             Log.e(TAG, " --UARTControlFragment---onReceive:-------> " + data);
 
-            Map<String, Object> stringObjectMap = new HashMap<>();
-            stringObjectMap.put("id", System.currentTimeMillis());
-            stringObjectMap.put("data", data);
-            SQLiteHelper.getInstance().mUartDB.insertData(SQLiteHelper.getInstance().getDBInstance(), stringObjectMap);
+//            Map<String, Object> stringObjectMap = new HashMap<>();
+//            stringObjectMap.put("id", System.currentTimeMillis());
+//            stringObjectMap.put("data", data);
+//            SQLiteHelper.getInstance().mUartDB.insertData(SQLiteHelper.getInstance().getDBInstance(), stringObjectMap);
             String s = GsonUtils.returnFormatText(data);
             // String s1 = GsonUtils.returnStatus(s);//最终要展示的数据
             Message message = Message.obtain();
@@ -426,12 +428,11 @@ public class UARTControlScoreFragment extends Fragment implements UARTActivity.C
 //                }
 //            }
             int count = (mAdapter.getCount() + 1);
-            lisdata.add(msg.obj.toString());
+            //lisdata.add(msg.obj.toString());
             serverDataList.add(msg.obj.toString());
             mAdapter.add(msg.obj.toString() + "," + count);
             mEasyRecyclerView.scrollToPosition(mAdapter.getCount());
             mAdapter.notifyDataSetChanged();
-
             List<Map<String, Object>> maps = SQLiteHelper.getInstance().mUartDB.queryUserInfo(SQLiteHelper.getInstance().getDBInstance(), null);
             Logger.d("数据库中数据：" + new Gson().toJson(maps));
         }
@@ -467,12 +468,18 @@ public class UARTControlScoreFragment extends Fragment implements UARTActivity.C
     public void onDestroy() {
         super.onDestroy();
         ((UARTActivity) requireActivity()).setConfigurationListener(null);
-
+        if (myReceiver != null) {
+            requireActivity().unregisterReceiver(myReceiver);
+        }
         if (uartInterface != null) {
             uartInterface.send("<M>Stop</M>");
             uartInterface = null;
         }
-        if (bleService != null)
-            bleService.disconnect();
+        if (bleService != null) {
+            try {
+                bleService.disconnect();
+            }catch (Exception e){
+            }
+        }
     }
 }

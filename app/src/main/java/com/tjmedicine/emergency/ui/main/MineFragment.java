@@ -8,9 +8,12 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.lxj.xpopup.XPopup;
 import com.tjmedicine.emergency.R;
 import com.tjmedicine.emergency.common.base.BaseFragment;
 import com.tjmedicine.emergency.common.cache.SharedPreferences.UserInfo;
+import com.tjmedicine.emergency.common.dialog.CustomDjsFullScreenPopup;
+import com.tjmedicine.emergency.common.dialog.CustomFullScreenPopup;
 import com.tjmedicine.emergency.ui.login.view.activity.LoginActivity;
 import com.tjmedicine.emergency.ui.me.view.PersonalActivity;
 import com.tjmedicine.emergency.ui.mine.apply.view.MineApplyActivity;
@@ -20,6 +23,7 @@ import com.tjmedicine.emergency.ui.mine.health.HealthFileActivity;
 import com.tjmedicine.emergency.ui.mine.volunteer.view.ApplyVolunteerActivity;
 import com.tjmedicine.emergency.ui.other.AboutActivity;
 import com.tjmedicine.emergency.ui.other.AccessFeedbackActivity;
+import com.tjmedicine.emergency.utils.ToastUtils;
 
 import butterknife.BindView;
 import butterknife.OnClick;
@@ -42,6 +46,7 @@ public class MineFragment extends BaseFragment {
     TextView mPersonSign;
     @BindView(R.id.civ_header)
     CircleImageView mHeader;
+    CustomDjsFullScreenPopup customDjsFullScreenPopup;
 
     @Override
     protected void initView() {
@@ -83,9 +88,8 @@ public class MineFragment extends BaseFragment {
         return R.layout.fragment_mine;
     }
 
-
     @OnClick({R.id.btn_login, R.id.ll_my_apply, R.id.ll_my_verified, R.id.ll_my_health_file,
-            R.id.ll_about_us, R.id.ll_feedback, R.id.tv_apply_volunteer
+            R.id.ll_about_us, R.id.ll_feedback, R.id.tv_apply_volunteer,R.id.tv_verified
             , R.id.tv_set_emergency_contact, R.id.ll_login_success, R.id.civ_header})
     public void initOnClick(View view) {
         switch (view.getId()) {
@@ -108,6 +112,13 @@ public class MineFragment extends BaseFragment {
             case R.id.tv_set_emergency_contact:
                 if (mApp.isLogin()) {
                     startActivity(EmergencyContactActivity.class);
+                } else {
+                    startActivity(LoginActivity.class);
+                }
+                break;
+            case R.id.tv_verified:
+                if (mApp.isLogin()) {
+                    startActivity(MineAuthActivity.class);
                 } else {
                     startActivity(LoginActivity.class);
                 }

@@ -3,10 +3,7 @@ package com.tjmedicine.emergency.utils;
 import android.content.Context;
 
 
-/**
- * @Date on 2019/1/11.
- * @Author by xrf05.
- */
+
 public class DensityUtil {
 
     /**

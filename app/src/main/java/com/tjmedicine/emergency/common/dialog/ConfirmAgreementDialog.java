@@ -21,6 +21,8 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
+import com.mob.MobSDK;
+import com.mob.PrivacyPolicy;
 import com.tjmedicine.emergency.R;
 import com.tjmedicine.emergency.common.global.Constants;
 import com.tjmedicine.emergency.common.global.GlobalConstants;
@@ -40,6 +42,7 @@ public class ConfirmAgreementDialog extends Dialog {
     private TextView mMessage, mWarnMessage, mOk, mCancel;
     private ConfirmCallback mConfirmCallback;
     private LinearLayout mDialogContent;
+    private String url;
 
     public ConfirmAgreementDialog(@NonNull Context context) {
         super(context);
@@ -64,7 +67,20 @@ public class ConfirmAgreementDialog extends Dialog {
                 dismissDialog(0);
             }
         });
+        MobSDK.getPrivacyPolicyAsync(MobSDK.POLICY_TYPE_URL, new PrivacyPolicy.OnPolicyListener() {
+            @Override
+            public void onComplete(PrivacyPolicy data) {
+                if (data != null) {
+                    // 富文本内容
+                    url = data.getContent();
+                }
+            }
 
+            @Override
+            public void onFailure(Throwable t) {
+                // 请求失败
+            }
+        });
         mBuilder.setView(mView);
 
         mDialog = mBuilder.create();
@@ -77,9 +93,9 @@ public class ConfirmAgreementDialog extends Dialog {
 
     //  Html.fromHtml("点击登录,即同意<font color=\"#0498f5\">《叫个工人用户协议》</font>");
 
-    String ServiceAgreement = "<font color=\"#0498f5\">《服务协议》</font>";
+    String ServiceAgreement = "<font color=\"#0498f5\">服务协议及隐私政策</font>";
 
-    String privacyPolicy = "<font color=\"#0498f5\">《隐私政策》</font>";
+    String privacyPolicy = "<font color=\"#0498f5\">第三方服务和隐私政策</font>";
 
     String notice = "<font color=\"#000000\">为了向你提供地理位置等服务,我们需要收集您的定位信息，你可以在设置中查看、变更并管理你的授权。</font>";
 
@@ -87,10 +103,10 @@ public class ConfirmAgreementDialog extends Dialog {
         mMessage.setText(message);
         mConfirmCallback = callback;
         showDialog();
+        // 异步方法查询隐私,locale可以为null或不设置，默认使用当前系统语言
 
-        SpannableString spannableString = new SpannableString(Html.fromHtml("请你务必审慎阅读、充分理解" + ServiceAgreement + "和" + privacyPolicy + "各条款，包括但不限于:" +
+        SpannableString spannableString = new SpannableString(Html.fromHtml("请你务必审慎阅读、充分理解" + ServiceAgreement + "/" + privacyPolicy + "各条款，包括但不限于:" +
                 notice));
-
 
         spannableString.setSpan(new Clickable(new View.OnClickListener() {
             @Override
@@ -101,18 +117,18 @@ public class ConfirmAgreementDialog extends Dialog {
                 intent.putExtra(Constants.WEB_KEY_FLAG, 1);
                 mContext.startActivity(intent);
             }
-        }), 13, 19, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }), 13, 22, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
         spannableString.setSpan(new Clickable(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //点击代码
                 Intent intent = new Intent(mContext, WebActivity.class);
-                intent.putExtra(Constants.WEB_KEY_URL, GlobalConstants.PRIVACYPOLICY_URL);
+                intent.putExtra(Constants.WEB_KEY_URL, url);
                 intent.putExtra(Constants.WEB_KEY_FLAG, 1);
                 mContext.startActivity(intent);
             }
-        }), 20, 26, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }), 23, 33, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
         mWarnMessage.setText(spannableString);
         mWarnMessage.setMovementMethod(LinkMovementMethod.getInstance());

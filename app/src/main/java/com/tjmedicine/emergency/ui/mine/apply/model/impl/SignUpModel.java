@@ -18,7 +18,7 @@ public class SignUpModel extends BaseModel implements ISignUpModel {
         HttpProvider.doGet(GlobalConstants.APP_USER_FIND_SIGNUP, new HttpProvider.ResponseCallback() {
             @Override
             public void callback(String responseText) {
-                executeDataCallback(responseText, new TypeToken<ResponseDataEntity<ContactBean>>() {
+                executeDataCallback(responseText, new TypeToken<ResponseDataEntity<SignUpBean>>() {
                 }.getType(), listener);
             }
         });
@@ -26,11 +26,10 @@ public class SignUpModel extends BaseModel implements ISignUpModel {
 
     @Override
     public void signUp(String activityId, OnCallbackListener listener) {
-        HttpProvider.doGet(GlobalConstants.APP_USER_SIGNUP, new HttpProvider.ResponseCallback() {
+        HttpProvider.doGet(GlobalConstants.APP_USER_SIGNUP+activityId, new HttpProvider.ResponseCallback() {
             @Override
             public void callback(String responseText) {
-                executeCallback(responseText, new TypeToken<ResponseDataEntity<SignUpBean>>() {
-                }.getType(), listener);
+                executeCallback(responseText,null, listener);
             }
         });
     }

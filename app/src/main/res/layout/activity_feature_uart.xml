@@ -19,52 +19,53 @@
   ~ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
   ~ USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	xmlns:tools="http://schemas.android.com/tools"
-	android:id="@+id/container"
-	android:layout_width="match_parent"
-	android:layout_height="match_parent"
-	android:orientation="vertical">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
 
 
-	<FrameLayout
-		style="@style/HeaderShadow"
-		android:id="@+id/content"
-		android:layout_width="match_parent"
-		android:layout_height="match_parent">
+    <FrameLayout
+        android:id="@+id/content"
+        style="@style/HeaderShadow"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="visible">
 
-<!--		<fragment-->
-<!--			android:id="@+id/fragment_control"-->
-<!--			android:layout_width="match_parent"-->
-<!--			android:layout_height="match_parent"/>-->
+        <!--		<fragment-->
+        <!--			android:id="@+id/fragment_control"-->
+        <!--			android:layout_width="match_parent"-->
+        <!--			android:layout_height="match_parent"/>-->
 
-<!--		<fragment-->
-<!--			android:id="@+id/fragment_control_score"-->
-<!--			android:name="com.tjmedicine.emergency.ui.uart.UARTControlScoreFragment"-->
-<!--			android:layout_width="match_parent"-->
-<!--			android:layout_height="match_parent"-->
-<!--			android:visibility="gone"-->
-<!--			tools:layout="@layout/fragment_feature_uart_control_score"-->
-<!--			/>-->
+        <!--		<fragment-->
+        <!--			android:id="@+id/fragment_control_score"-->
+        <!--			android:name="com.tjmedicine.emergency.ui.uart.UARTControlScoreFragment"-->
+        <!--			android:layout_width="match_parent"-->
+        <!--			android:layout_height="match_parent"-->
+        <!--			android:visibility="gone"-->
+        <!--			tools:layout="@layout/fragment_feature_uart_control_score"-->
+        <!--			/>-->
 
-		<androidx.slidingpanelayout.widget.SlidingPaneLayout
-			android:id="@+id/sliding_pane"
-			android:visibility="gone"
-			android:layout_width="match_parent"
-			android:layout_height="match_parent">
+        <androidx.slidingpanelayout.widget.SlidingPaneLayout
+            android:id="@+id/sliding_pane"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone">
 
-			<fragment
-				android:id="@+id/fragment_log"
-				android:name="com.tjmedicine.emergency.ui.uart.UARTLogFragment"
-				android:layout_width="match_parent"
-				android:layout_height="match_parent"
-				tools:layout="@layout/fragment_feature_uart_log" />
-
-
-		</androidx.slidingpanelayout.widget.SlidingPaneLayout>
+            <fragment
+                android:id="@+id/fragment_log"
+                android:name="com.tjmedicine.emergency.ui.uart.UARTLogFragment"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                tools:layout="@layout/fragment_feature_uart_log" />
 
 
-	</FrameLayout>
+        </androidx.slidingpanelayout.widget.SlidingPaneLayout>
 
-</LinearLayout>
+
+    </FrameLayout>
+
+</RelativeLayout>

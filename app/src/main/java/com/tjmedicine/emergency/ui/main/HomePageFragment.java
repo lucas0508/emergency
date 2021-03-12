@@ -58,6 +58,13 @@ import com.amap.api.maps.model.LatLngBounds;
 import com.amap.api.maps.model.Marker;
 import com.amap.api.maps.model.MarkerOptions;
 import com.amap.api.maps.model.MyLocationStyle;
+import com.amap.api.maps.model.Poi;
+import com.amap.api.navi.AmapNaviPage;
+import com.amap.api.navi.AmapNaviParams;
+import com.amap.api.navi.AmapNaviType;
+import com.amap.api.navi.INaviInfoCallback;
+import com.amap.api.navi.model.AMapNaviLocation;
+import com.lxj.xpopup.XPopup;
 import com.orhanobut.logger.Logger;
 import com.tjmedicine.emergency.EmergencyApplication;
 import com.tjmedicine.emergency.R;
@@ -67,8 +74,10 @@ import com.tjmedicine.emergency.common.base.OnMultiClickListener;
 import com.tjmedicine.emergency.common.bean.MapDataBeen;
 import com.tjmedicine.emergency.common.cache.SharedPreferences.UserInfo;
 import com.tjmedicine.emergency.common.dialog.DialogManage;
+import com.tjmedicine.emergency.common.dialog.DistanceDialog;
 import com.tjmedicine.emergency.common.global.Constants;
 import com.tjmedicine.emergency.common.server.LocationService;
+import com.tjmedicine.emergency.ui.login.view.activity.LoginActivity;
 import com.tjmedicine.emergency.ui.map.Cluster;
 import com.tjmedicine.emergency.ui.map.ClusterClickListener;
 import com.tjmedicine.emergency.ui.map.ClusterItem;
@@ -77,11 +86,16 @@ import com.tjmedicine.emergency.ui.map.ClusterRender;
 import com.tjmedicine.emergency.ui.map.RegionItem;
 import com.tjmedicine.emergency.ui.map.presenter.IMapDataView;
 import com.tjmedicine.emergency.ui.map.presenter.MapDataPresenter;
+import com.tjmedicine.emergency.ui.mseeage.systemInformation.SystemInformationActivity;
+import com.tjmedicine.emergency.ui.navi.NaviActivity;
+import com.tjmedicine.emergency.ui.navi.TabFragment;
 import com.tjmedicine.emergency.ui.uart.UARTActivity;
+import com.tjmedicine.emergency.utils.AnimUtil;
 import com.tjmedicine.emergency.utils.GifLoadOneTimeGif;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -92,7 +106,7 @@ import butterknife.ButterKnife;
 
 import static me.jessyan.autosize.utils.AutoSizeUtils.dp2px;
 
-public class HomePageFragment extends BaseFragment implements AMap.OnMapLoadedListener, AMap.OnCameraChangeListener, LocationSource, AMapLocationListener, ClusterRender, ClusterClickListener, AMap.InfoWindowAdapter, AMap.OnMapClickListener, IMapDataView {
+public class HomePageFragment extends BaseFragment implements AMap.OnMapLoadedListener, AMap.OnCameraChangeListener, LocationSource, AMapLocationListener, ClusterRender, ClusterClickListener, AMap.InfoWindowAdapter, AMap.OnMapClickListener, IMapDataView, INaviInfoCallback {
 
     private static final int STROKE_COLOR = Color.argb(180, 3, 145, 255);
     private static final int FILL_COLOR = Color.argb(10, 0, 0, 180);
@@ -111,15 +125,14 @@ public class HomePageFragment extends BaseFragment implements AMap.OnMapLoadedLi
     ImageView mVolunteers;
     @BindView(R.id.iv_aids)
     ImageView mAids;
-
-
+    @BindView(R.id.iv_common_right)
+    ImageView iv_common_right;
     @BindView(R.id.iv_location)
     ImageView mLocation;
     private AMap aMap;
     public View mView;
 
 
-    private float mPXInMeters;
     private Circle mcircle;
     private boolean isLoad = true;
     private LatLng latLngDistrict;
@@ -177,21 +190,24 @@ public class HomePageFragment extends BaseFragment implements AMap.OnMapLoadedLi
         mDummy.setOnClickListener(new OnMultiClickListener() {
             @Override
             public void onMultiClick(View v) {
-                mApp.getOptionDialog().show("请选择模式", new String[]{"1", "2"}, position -> {
-                    /**
-                     * type  1: 练习
-                     *       2：测试
-                     */
-                    Bundle bundle = new Bundle();
-                    if (position == 0) {
-                        bundle.putString("mode", "1");
-                    } else if (position == 1) {
-                        bundle.putString("mode", "2");
-                    }
-                    startActivity(UARTActivity.class, bundle);
-                });
 
-
+                if (mApp.isLogin()) {
+                    mApp.getOptionDialog().show("请选择模式", new String[]{"1", "2"}, position -> {
+                        /**
+                         * type  1: 练习
+                         *       2：测试
+                         */
+                        Bundle bundle = new Bundle();
+                        if (position == 0) {
+                            bundle.putString("mode", "1");
+                        } else if (position == 1) {
+                            bundle.putString("mode", "2");
+                        }
+                        startActivity(UARTActivity.class, bundle);
+                    });
+                } else {
+                    startActivity(LoginActivity.class);
+                }
             }
         });
         mLocation.setOnClickListener(new OnMultiClickListener() {
@@ -203,6 +219,7 @@ public class HomePageFragment extends BaseFragment implements AMap.OnMapLoadedLi
         mDoctors.setOnClickListener(new OnMultiClickListener() {
             @Override
             public void onMultiClick(View v) {
+                AnimUtil.starAnim2(mDoctors);
 //                userOverlay(Constants.MAPROLE_DOCTOR);
                 mapDataPresenter.queryMapData(Constants.MAPROLE_DOCTOR);
             }
@@ -211,6 +228,7 @@ public class HomePageFragment extends BaseFragment implements AMap.OnMapLoadedLi
             @Override
             public void onMultiClick(View v) {
 //                userOverlay(Constants.MAPROLE_VOLUNTEER);
+                AnimUtil.starAnim2(mVolunteers);
                 mapDataPresenter.queryMapData(Constants.MAPROLE_VOLUNTEER);
             }
         });
@@ -218,7 +236,17 @@ public class HomePageFragment extends BaseFragment implements AMap.OnMapLoadedLi
             @Override
             public void onMultiClick(View v) {
 //                userOverlay(Constants.MAPROLE_AED);
+                AnimUtil.starAnim2(mAids);
                 mapDataPresenter.queryMapData(Constants.MAPROLE_AED);
+            }
+        });
+
+        iv_common_right.setOnClickListener(new OnMultiClickListener() {
+
+            @Override
+            public void onMultiClick(View v) {
+                startActivity(SystemInformationActivity.class);
+
             }
         });
     }
@@ -242,7 +270,8 @@ public class HomePageFragment extends BaseFragment implements AMap.OnMapLoadedLi
             aMap.clear();
         }
         aMap = mapView.getMap();
-        setMapCustomStyleFile(requireActivity());
+        //显示地图简单样式
+        //setMapCustomStyleFile(requireActivity());
         aMap.setLocationSource(this);
         aMap.setMyLocationEnabled(true);
         aMap.setOnMapLoadedListener(this);
@@ -252,7 +281,6 @@ public class HomePageFragment extends BaseFragment implements AMap.OnMapLoadedLi
         aMap.setCustomMapStyle(mapStyleOptions);
         aMap.getUiSettings().setScaleControlsEnabled(true);
         aMap.getUiSettings().setRotateGesturesEnabled(false);
-        mPXInMeters = aMap.getScalePerPixel();
         aMap.getUiSettings().setZoomControlsEnabled(false);
         //mapDataPresenter.updateAddress(myMapLocation.getLatitude(),myMapLocation.getLongitude());
     }
@@ -312,7 +340,6 @@ public class HomePageFragment extends BaseFragment implements AMap.OnMapLoadedLi
     @Override
     public void onMapLoaded() {
 //        doSearchQuery();.
-        aMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(myMapLocation.getLatitude(), myMapLocation.getLongitude()), 17), 500, null);
 
     }
 
@@ -322,8 +349,8 @@ public class HomePageFragment extends BaseFragment implements AMap.OnMapLoadedLi
 
     @Override
     public void onCameraChangeFinish(CameraPosition cameraPosition) {
+        Log.e("比例尺缩放级别", "onCameraChangeFinish:--》 " + cameraPosition.zoom);
         //addMarkerInScreenCenter();
-        mPXInMeters = aMap.getScalePerPixel();
         if (mcircle == null) {
             mcircle = aMap.addCircle(new CircleOptions().center(cameraPosition.target).radius(150).strokeColor(1));
         }
@@ -384,6 +411,8 @@ public class HomePageFragment extends BaseFragment implements AMap.OnMapLoadedLi
                 Log.e("AmapErr", aMapLocation.getLongitude() + ":经度");
                 UserInfo.setLang(String.valueOf(aMapLocation.getLongitude()));
                 UserInfo.setLat(String.valueOf(aMapLocation.getLatitude()));
+                // aMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(myMapLocation.getLatitude(), myMapLocation.getLongitude()), 17), 500, null);
+                aMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(myMapLocation.getLatitude(), myMapLocation.getLongitude()), 17));
 
             } else {
                 String errText = "定位失败," + aMapLocation.getErrorCode() + ": " + aMapLocation.getErrorInfo();
@@ -439,7 +468,6 @@ public class HomePageFragment extends BaseFragment implements AMap.OnMapLoadedLi
 //
 //    }
 
-
     /**
      * @param marker       点击的聚合点
      * @param clusterItems
@@ -450,12 +478,30 @@ public class HomePageFragment extends BaseFragment implements AMap.OnMapLoadedLi
         clickMaker = marker;
         clusterItems.get(0).getPosition();
         Logger.d("执行了" + clusterItems.get(0).getPosition());
-        marker.showInfoWindow();
-//        if (cluster.getClusterCount() == 1 && mApp.isLoginToDialog() && clusterItems.get(0).getWorkerStar() != null) {
+
+        DPoint dmPoint = new DPoint();
+        dmPoint.setLatitude(myMapLocation.getLatitude());
+        dmPoint.setLongitude(myMapLocation.getLongitude());
+        DPoint dhPoint = new DPoint();
+        dhPoint.setLatitude(marker.getPosition().latitude);
+        dhPoint.setLongitude(marker.getPosition().longitude);
+        CoordinateConverter.calculateLineDistance(dmPoint, dhPoint);
+        // dmPoint      我的点
+        // dhPoint      目标点
+        float distance = CoordinateConverter.calculateLineDistance(dmPoint, dhPoint);
+        BigDecimal bd = new BigDecimal(distance/ 1000);
+        //保留小数点后n位，并四舍五入
+        bd = (bd).setScale(1, BigDecimal.ROUND_HALF_UP);
+        if (cluster.getClusterCount() == 1 && clusterItems.get(0).getMapRole() == Constants.MAPROLE_AED) {
 //            mApp.getUserInfoDialog().show(clusterItems.get(0).getUserId(), null);
-//        } else if (cluster.getClusterCount() == 1 && mApp.isLoginToDialog() && clusterItems.get(0).getWorkerStar() == null) {
-//            mApp.getBusinessInfoDialog().show(clusterItems.get(0).getUserId());
-//        }
+//            marker.showInfoWindow();
+            String title = clusterItems.get(0).getTitleName();
+            String address = clusterItems.get(0).getAddress();
+            DistanceDialog distanceDialog = new DistanceDialog(requireActivity(), bd.floatValue(), title, address,
+                    marker.getPosition().latitude, marker.getPosition().longitude, myMapLocation.getAddress());
+            new XPopup.Builder(requireActivity()).asCustom(distanceDialog).show();
+        }
+
         LatLngBounds.Builder builder = new LatLngBounds.Builder();
         for (ClusterItem clusterItem : clusterItems) {
             builder.include(clusterItem.getPosition());
@@ -568,26 +614,39 @@ public class HomePageFragment extends BaseFragment implements AMap.OnMapLoadedLi
             infoWindow = LayoutInflater.from(requireActivity()).inflate(R.layout.homepage_click_item, null);
         }
         render(marker, infoWindow);
-        return null;
+        return infoWindow;
+        // TODO: 2021-01-21 地图点击显示View  暂时注释
     }
 
     private void render(Marker marker, View view) {
-        TextView mName = view.findViewById(R.id.tv_name);
-        TextView mDistance = view.findViewById(R.id.tv_distance);
-        DPoint dmPoint = new DPoint();
-        dmPoint.setLatitude(myMapLocation.getLatitude());
-        dmPoint.setLongitude(myMapLocation.getLongitude());
-        DPoint dhPoint = new DPoint();
-        dhPoint.setLatitude(marker.getPosition().latitude);
-        dhPoint.setLongitude(marker.getPosition().longitude);
-        CoordinateConverter.calculateLineDistance(dmPoint, dhPoint);
-        // dmPoint      我的点
-        // dhPoint         目标点
-        float distance = CoordinateConverter.calculateLineDistance(dmPoint, dhPoint);
-
-        mName.setText("志愿者距您");
-        mDistance.setText("" + (int) distance);
-
+//        TextView mName = view.findViewById(R.id.tv_name);
+//        TextView mGps = view.findViewById(R.id.tv_gps);
+//        TextView mDistance = view.findViewById(R.id.tv_distance);
+//
+//        TextView mAddress = view.findViewById(R.id.tv_address);
+//        DPoint dmPoint = new DPoint();
+//        dmPoint.setLatitude(myMapLocation.getLatitude());
+//        dmPoint.setLongitude(myMapLocation.getLongitude());
+//        DPoint dhPoint = new DPoint();
+//        dhPoint.setLatitude(marker.getPosition().latitude);
+//        dhPoint.setLongitude(marker.getPosition().longitude);
+//        CoordinateConverter.calculateLineDistance(dmPoint, dhPoint);
+//        // dmPoint      我的点
+//        // dhPoint      目标点
+//        float distance = CoordinateConverter.calculateLineDistance(dmPoint, dhPoint);
+//        mName.setText("急救AED设备（边防总队）");
+//        mDistance.setText("距您 " + distance / 1000 + "km");
+//        mAddress.setText("新城区乌兰恰特东街8号");
+//
+//        mGps.setOnClickListener(new OnMultiClickListener() {
+//            @Override
+//            public void onMultiClick(View v) {
+//                //startActivity(NaviActivity.class);
+////                LatLng p2 = new LatLng(39.917337, 116.397056);//故宫博物院
+//                LatLng p2 = new LatLng(marker.getPosition().latitude, marker.getPosition().longitude);
+//                AmapNaviPage.getInstance().showRouteActivity(requireActivity(), new AmapNaviParams(null, null, new Poi(myMapLocation.getAddress(), p2, ""), AmapNaviType.DRIVER), HomePageFragment.this);
+//            }
+//        });
     }
 
     @Override
@@ -617,8 +676,8 @@ public class HomePageFragment extends BaseFragment implements AMap.OnMapLoadedLi
         int role = 0;
         for (MapDataBeen mapDataBeen : mapDataBeens) {
             LatLng latLng = new LatLng(mapDataBeen.getLat(), mapDataBeen.getLng(), false);
-            RegionItem regionItem = new RegionItem(latLng, mapDataBeen.getAddress());
-            role=mapDataBeen.getType();
+            RegionItem regionItem = new RegionItem(latLng, mapDataBeen.getAddress(), mapDataBeen.getType(),mapDataBeen.getAddress());
+            role = mapDataBeen.getType();
             items.add(regionItem);
         }
         mClusterOverlay = new ClusterOverlay(aMap, items,
@@ -641,5 +700,105 @@ public class HomePageFragment extends BaseFragment implements AMap.OnMapLoadedLi
     @Override
     public void updateAddressFail(String info) {
 
+    }
+
+    @Override
+    public void onInitNaviFailure() {
+
+    }
+
+    @Override
+    public void onGetNavigationText(String s) {
+
+    }
+
+    @Override
+    public void onLocationChange(AMapNaviLocation aMapNaviLocation) {
+
+    }
+
+    @Override
+    public void onArriveDestination(boolean b) {
+
+    }
+
+    @Override
+    public void onStartNavi(int i) {
+
+    }
+
+    @Override
+    public void onCalculateRouteSuccess(int[] ints) {
+
+    }
+
+    @Override
+    public void onCalculateRouteFailure(int i) {
+
+    }
+
+    @Override
+    public void onStopSpeaking() {
+
+    }
+
+    @Override
+    public void onReCalculateRoute(int i) {
+
+    }
+
+    @Override
+    public void onExitPage(int i) {
+
+    }
+
+    @Override
+    public void onStrategyChanged(int i) {
+
+    }
+
+    @Override
+    public void onArrivedWayPoint(int i) {
+
+    }
+
+    @Override
+    public void onMapTypeChanged(int i) {
+
+    }
+
+    @Override
+    public void onNaviDirectionChanged(int i) {
+
+    }
+
+    @Override
+    public void onDayAndNightModeChanged(int i) {
+
+    }
+
+    @Override
+    public void onBroadcastModeChanged(int i) {
+
+    }
+
+    @Override
+    public void onScaleAutoChanged(boolean b) {
+
+    }
+
+    @Override
+    public View getCustomMiddleView() {
+        return null;
+    }
+
+    @Override
+    public View getCustomNaviView() {
+        return null;
+    }
+
+    @Override
+    public View getCustomNaviBottomView() {
+        return null;
     }
 }

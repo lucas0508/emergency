@@ -1,7 +1,7 @@
 plugins {
     id 'com.android.application'
 }
-
+apply plugin: 'com.mob.sdk'
 
 android {
     signingConfigs {
@@ -43,6 +43,19 @@ android {
             // 签名文件：emergency2020
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+
+            //是否开启zip优化
+            zipAlignEnabled true
+            //是否开启混淆
+            minifyEnabled false
+            //正式的签名文件
+            signingConfig signingConfigs.release
+//            android.applicationVariants.all { variant ->
+//                variant.outputs.all {
+//                    outputFileName = "121急救_${variant.name}-${variant.versionName}-${releaseTime()}.apk"
+//                }
+//            }
+
         }
     }
     compileOptions {
@@ -54,20 +67,14 @@ android {
         javaMaxHeapSize "4g"
         preDexLibraries = false
     }
+    defaultConfig { ndk { abiFilters 'armeabi', 'armeabi-v7a', 'x86', 'arm64-v8a' } }
 }
 
-
-repositories {
-    flatDir {
-        dirs 'libs'
-    }
-}
 
 def releaseTime() {
     return new Date().format("yyyyMMdd", TimeZone.getTimeZone("UTC"))
 }
 
-apply plugin: 'com.mob.sdk'
 
 // 在MobSDK的扩展中注册MobPush的相关信息
 MobSDK {
@@ -75,29 +82,19 @@ MobSDK {
     appSecret "b6a50b2b58829e98690e31efd3b0427b"
 
     gui true
-    MobPush {}
-//    MobPush {
-//        debugLevel 4
-//        devInfo {
-//            XIAOMI {
-//                appId "2882303761518300242"
-//                appKey "5581830029242"
-//            }
-//
-//            HUAWEI {
-//                appId "101595257"
-//            }
-//
-//            MEIZU {
-//                appId "127372"
-//                appKey "3fc6d1acc7ea4f90a0304967ee3a74ae"
-//            }
-//
-//            FCM {
-//                //设置默认推送通知显示图标
-//                iconRes "@mipmap/default_ic_launcher"
-//            }
-//
+    MobPush {
+        debugLevel 4
+        //设置角标开关（不需要可不设置）
+        badge true
+        devInfo {
+            XIAOMI {
+                appId "2882303761519017398"
+                appKey "5581901732398"
+            }
+
+            HUAWEI {
+                appId "103814927"
+            }
 //            OPPO {
 //                appKey "6303014506164557acc69df6ef14300b"
 //                appSecret "c850609d8a0f492f8b9eeca1189aaec2"
@@ -107,20 +104,18 @@ MobSDK {
 //                appId "18568"
 //                appKey "9b01729c-6140-4ad3-ac79-4c4543e12130"
 //            }
-//        }
-//    }
+        }
+    }
 }
 
-dependencies {
 
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'com.google.android.material:material:1.3.0-alpha01'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
-    implementation files('libs\\AMap_Location_V5.2.0_20200915.jar')
-    implementation files('libs\\AMap_Search_V7.7.0_20201027.jar')
-    implementation files('libs\\Android_Map3D_SDK_V7.7.0_20201027.jar')
     implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.0.0'
-    implementation files('libs\\AMap_Location_V5.2.0_20200915.jar')
+
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
@@ -174,7 +169,7 @@ dependencies {
     implementation 'com.google.android:flexbox:1.0.0' //瀑布流LayoutManager
 
     implementation 'com.lxj:xpopup:2.2.12'
-
+    implementation 'com.lxj:xpopup-ext:0.0.4'
     implementation 'com.facebook.rebound:rebound:latest.release'
 
     implementation 'com.contrarywind:Android-PickerView:4.1.9'
@@ -189,4 +184,7 @@ dependencies {
 
     implementation 'com.zzhoujay.richtext:richtext:3.0.8'
 
+    implementation 'com.github.hackware1993:MagicIndicator:1.7.0'
+    implementation 'com.airbnb.android:lottie:3.6.0'
+    implementation 'com.github.lecho:hellocharts-library:1.5.8@aar'
 }

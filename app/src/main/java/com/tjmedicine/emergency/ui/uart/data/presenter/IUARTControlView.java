@@ -16,7 +16,7 @@ public interface IUARTControlView {
     /**
      * 成功
      */
-    void postUARTDataSuccess(String score);
+    void postUARTDataSuccess(Double score);
 
     /**
      * 失败

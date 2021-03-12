@@ -61,13 +61,16 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.slidingpanelayout.widget.SlidingPaneLayout;
 
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.lxj.xpopup.XPopup;
 import com.tjmedicine.emergency.R;
+import com.tjmedicine.emergency.common.dialog.CustomFullScreenPopup;
 import com.tjmedicine.emergency.ui.uart.domain.UartConfiguration;
 import com.tjmedicine.emergency.ui.uart.profile.BleProfileService;
 import com.tjmedicine.emergency.ui.uart.profile.BleProfileServiceReadyActivity;
 import com.tjmedicine.emergency.ui.uart.profile.UARTConfigurationSynchronizer;
 import com.tjmedicine.emergency.ui.uart.profile.UARTConfigurationsAdapter;
 import com.tjmedicine.emergency.ui.uart.profile.UARTInterface;
+import com.tjmedicine.emergency.ui.uart.scanner.ScannerFragment;
 
 import java.util.UUID;
 
@@ -88,6 +91,7 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
     private String modes;
     UARTControlFragment uartControlFragment;
     UARTControlScoreFragment uartControlScoreFragment;
+     ScannerFragment dialog;
 
     public interface ConfigurationListener {
         void onConfigurationModified();
@@ -155,12 +159,38 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
         return R.layout.activity_feature_uart;
     }
 
+
     @Override
     protected void initView() {
         modes = getIntent().getStringExtra("mode");
         container = findViewById(R.id.container);
 //        TextView title = findViewById(R.id.tv_title);
 //        title.setText("模拟人");
+
+
+        if (isBLEEnabled()) {
+            // isBLEEnabled()
+            if (service == null) {
+//                setDefaultUI();
+                //x搜索所有的可连接蓝牙，用户自行连接
+                // showDeviceScanningDialog(getFilterUUID());
+                //x根据UUID搜索可用蓝牙
+                //showDeviceScanningDialog(UART_SERVICE_UUID);
+//                x自动根据UUID自动连接脸呀
+//                connectBLE();
+
+//                CustomFullScreenPopup customFullScreenPopup = new CustomFullScreenPopup(this);
+//                new XPopup.Builder(this).asCustom(customFullScreenPopup).show();
+                showDeviceScanningDialog(UART_SERVICE_UUID);
+            } else {
+                if (serviceBinder != null) {
+                    serviceBinder.send("<M>Stop</M>");
+                }
+                service.disconnect();
+            }
+        } else {
+            showBLEDialog();
+        }
 
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         if (modes.equals("1")) {
@@ -183,10 +213,30 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
         fragmentTransaction.commit();
     }
 
+
+    /**
+     * Shows the scanner fragment.
+     *
+     * @param filter the UUID filter used to filter out available devices. The fragment will always show all bonded devices as there is no information about their
+     *               services
+     * @see #getFilterUUID()
+     */
+    private void showDeviceScanningDialog(final UUID filter) {
+            dialog = ScannerFragment.getInstance(filter);
+            dialog.show(getSupportFragmentManager(), "scan_fragment");
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if (dialog!=null) {
+            dialog.onDestroy();
+            dialog.dismiss();
+            dialog=null;
+        }
+
     }
+
 
     @Override
     protected void onCreateView(final Bundle savedInstanceState) {
@@ -199,12 +249,14 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
     @Override
     public void onServicesDiscovered(@NonNull final BluetoothDevice device, final boolean optionalServicesFound) {
         // do nothing
-        if (modes.equals("1")) {
-            if (null != uartControlFragment) uartControlFragment.onServiceStarted();
-        } else if (modes.equals("2")) {
-            if (null != uartControlScoreFragment)
-                uartControlScoreFragment.onServiceStarted();
-        }
+//        if (modes.equals("1")) {
+//            if (null != uartControlFragment) uartControlFragment.onServiceStarted();
+//        } else if (modes.equals("2")) {
+//            if (null != uartControlScoreFragment)
+//                uartControlScoreFragment.onServiceStarted();
+//        }
+//        dialog.onServiceStarted();
+        //  ScannerFragment.onServiceStarted()
     }
 
     @Override

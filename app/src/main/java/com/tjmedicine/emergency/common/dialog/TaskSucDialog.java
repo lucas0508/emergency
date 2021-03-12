@@ -64,7 +64,7 @@ public class TaskSucDialog extends Dialog {
         taskClose.setOnClickListener(clickListener);
     }
 
-    public void setTaskScore(int score) {
+    public void setTaskScore(Double score) {
         taskScore.setText(score + "");
         if (score < 90) {
             taskGrade.setText("Good !");

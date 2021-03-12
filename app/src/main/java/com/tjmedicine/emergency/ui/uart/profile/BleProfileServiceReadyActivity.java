@@ -34,6 +34,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -53,8 +54,10 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import com.lxj.xpopup.XPopup;
 import com.tjmedicine.emergency.R;
 import com.tjmedicine.emergency.common.base.BaseActivity;
+import com.tjmedicine.emergency.common.dialog.CustomFullScreenPopup;
 import com.tjmedicine.emergency.ui.uart.UARTControlScoreFragment;
 import com.tjmedicine.emergency.ui.uart.UARTRobotActivity;
 import com.tjmedicine.emergency.ui.uart.UARTService;
@@ -96,7 +99,7 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
     /**
      * Nordic UART Service UUID
      */
-    private final static UUID UART_SERVICE_UUID = UUID.fromString("6E400001-B5A3-F393-E0A9-E50E24DCCA9E");
+    protected final static UUID UART_SERVICE_UUID = UUID.fromString("6E400001-B5A3-F393-E0A9-E50E24DCCA9E");
     private final static int REQUEST_PERMISSION_REQ_CODE = 34; // any 8-bit number
     private final Handler handler = new Handler();
     private boolean scanning = false;
@@ -108,7 +111,7 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
     protected static final int REQUEST_ENABLE_BT = 2;
 
 
-    private E service;
+    public E service;
 
     private TextView deviceNameView;
     private Button connectButton;
@@ -271,13 +274,6 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
         onInitialize(savedInstanceState);
         // The onCreateView class should... create the view
         onCreateView(savedInstanceState);
-
-
-        // TODO: 2020-12-03 注釋標題
-//---------------------------------------------------------------------------------------------------------------
-//		final Toolbar toolbar = findViewById(R.id.toolbar_actionbar);
-//		setSupportActionBar(toolbar);
-//---------------------------------------------------------------------------------------------------------------
 
 
         // Common nRF Toolbox view references are obtained here
@@ -458,9 +454,11 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
         if (isBLEEnabled()) {
             // isBLEEnabled()
             if (service == null) {
-                //setDefaultUI();
+                setDefaultUI();
                 //x搜索所有的可连接蓝牙，用户自行连接
-                showDeviceScanningDialog(getFilterUUID());
+                // showDeviceScanningDialog(getFilterUUID());
+
+                showDeviceScanningDialog(UART_SERVICE_UUID);
                 //x自动根据UUID连接脸呀
                 //connectBLE();
             } else {
@@ -499,7 +497,9 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
                 return;
             }
 
-            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_PERMISSION_REQ_CODE);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_PERMISSION_REQ_CODE);
+            }
             return;
         }
 
@@ -632,13 +632,13 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
     @Override
     public void onDeviceSelected(@NonNull final BluetoothDevice device, final String name) {
         final int titleId = getLoggerProfileTitle();
-        if (titleId > 0) {
-            logSession = Logger.newSession(getApplicationContext(), getString(titleId), device.getAddress(), name);
-            // If nRF Logger is not installed we may want to use local logger
-            if (logSession == null && getLocalAuthorityLogger() != null) {
-                logSession = LocalLogSession.newSession(getApplicationContext(), getLocalAuthorityLogger(), device.getAddress(), name);
-            }
-        }
+//        if (titleId > 0) {
+//            logSession = Logger.newSession(getApplicationContext(), getString(titleId), device.getAddress(), name);
+//            // If nRF Logger is not installed we may want to use local logger
+//            if (logSession == null && getLocalAuthorityLogger() != null) {
+//                logSession = LocalLogSession.newSession(getApplicationContext(), getLocalAuthorityLogger(), device.getAddress(), name);
+//            }
+//        }
         bluetoothDevice = device;
         deviceName = name;
 
@@ -667,7 +667,7 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 //        deviceNameView.setText(deviceName != null ? deviceName : getString(R.string.not_available));
         if (connectButton != null)
             connectButton.setText(R.string.action_connecting);
-        Log.e("onDevice", " --UARTControlFragment---onReceive:-------> " + "设备连接中...");
+        Log.e("onDevice", " --BleProFileService---onReceive:-------> " + "设备连接中...");
     }
 
     private UARTInterface uartInterface;
@@ -676,10 +676,11 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
     @Override
     public void onDeviceConnected(@NonNull final BluetoothDevice device) {
 //        deviceNameView.setText(deviceName);
-        connectButton.setText(R.string.action_disconnect);
+        if (connectButton != null)
+            connectButton.setText(R.string.action_disconnect);
 
 
-        Log.e("onDevice", " --UARTControlFragment---onReceive:-------> " + "设备连接");
+        Log.e("onDevice", " --BleProFileService---onReceive:-------> " + "设备连接");
 //            UARTService.UARTBinder serviceBinder= (UARTService.UARTBinder) service;
 //            //发送消息
 //            serviceBinder.send("<M>Start</M>");
@@ -691,17 +692,19 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 
     @Override
     public void onDeviceDisconnecting(@NonNull final BluetoothDevice device) {
-        connectButton.setText(R.string.action_disconnecting);
+        if (connectButton != null)
+            connectButton.setText(R.string.action_disconnecting);
 
-        Log.e("onDevice", " --UARTControlFragment---onReceive:-------> " + "设备正在连接");
+        Log.e("onDevice", " --BleProFileService---onReceive:-------> " + "设备正在连接");
     }
 
     @Override
     public void onDeviceDisconnected(@NonNull final BluetoothDevice device) {
-        connectButton.setText(R.string.action_connect);
+        if (connectButton != null)
+            connectButton.setText(R.string.action_connect);
 //        deviceNameView.setText(getDefaultDeviceName());
 
-        Log.e("onDevice", " --UARTControlFragment---onReceive:-------> " + "设备断开连接");
+        Log.e("onDevice", " --BleProFileService---onReceive:-------> " + "设备断开连接");
 
         try {
             Logger.d(logSession, "Unbinding from the service...");
@@ -721,38 +724,38 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
     @Override
     public void onLinkLossOccurred(@NonNull final BluetoothDevice device) {
         // empty default implementation
-        Log.e("onDevice", " --UARTControlFragment---onReceive:-------> " + "111111");
+        Log.e("onDevice", " --BleProFileService---onReceive:-------> " + "111111");
     }
 
     @Override
     public void onServicesDiscovered(@NonNull final BluetoothDevice device, final boolean optionalServicesFound) {
         // empty default implementation
-        Log.e("onDevice", " --UARTControlFragment---onReceive:-------> " + "2222");
+        Log.e("onDevice", " --BleProFileService---onReceive:-------> " + "2222");
     }
 
     @Override
     public void onDeviceReady(@NonNull final BluetoothDevice device) {
         // empty default implementation
-        Log.e("onDevice", " --UARTControlFragment---onReceive:-------> " + "33333");
+        Log.e("onDevice", " --BleProFileService---onReceive:-------> " + "33333");
 
     }
 
     @Override
     public void onBondingRequired(@NonNull final BluetoothDevice device) {
         // empty default implementation
-        Log.e("onDevice", " --UARTControlFragment---onReceive:-------> " + "44444");
+        Log.e("onDevice", " --BleProFileService---onReceive:-------> " + "44444");
     }
 
     @Override
     public void onBonded(@NonNull final BluetoothDevice device) {
         // empty default implementation
-        Log.e("onDevice", " --UARTControlFragment---onReceive:-------> " + "55555");
+        Log.e("onDevice", " --BleProFileService---onReceive:-------> " + "55555");
     }
 
     @Override
     public void onBondingFailed(@NonNull final BluetoothDevice device) {
         // empty default implementation
-        Log.e("onDevice", " --UARTControlFragment---onReceive:-------> " + "66666");
+        Log.e("onDevice", " --BleProFileService---onReceive:-------> " + "66666");
     }
 
     @Override

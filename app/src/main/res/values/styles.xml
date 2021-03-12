@@ -27,6 +27,18 @@
     </style>
 
 
+    <style name="fullscreen_dialog" parent="@style/Theme.AppCompat.Dialog">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowFrame">@null</item>
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowBackground">@color/white</item>
+        <!--隐藏状态栏内容和高度，适用于SDK19（4.4）及以上版本-->
+        <item name="android:windowFullscreen">true</item>
+
+        <item name="android:windowTranslucentStatus" >true</item>
+
+    </style>
+
     <!--ActivityDialog底部弹出样式 start-->
     <style name="ActivityDialogTheme" parent="@style/Theme.AppCompat.Dialog">
         <!--设置dialog的背景-->

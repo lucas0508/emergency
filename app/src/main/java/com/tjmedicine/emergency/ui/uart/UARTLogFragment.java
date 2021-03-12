@@ -119,7 +119,6 @@ public class UARTLogFragment extends ListFragment implements LoaderManager.Loade
 			final UARTService.UARTBinder bleService = (UARTService.UARTBinder) service;
 			uartInterface = bleService;
 			logSession = bleService.getLogSession();
-
 			// Start the loader
 			if (logSession != null) {
 				getLoaderManager().restartLoader(LOG_REQUEST_ID, null, UARTLogFragment.this);

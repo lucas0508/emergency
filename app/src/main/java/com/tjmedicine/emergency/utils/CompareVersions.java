@@ -26,7 +26,6 @@ public class CompareVersions {
                 } else if (Integer.parseInt(str1[i]) < Integer.parseInt(str2[i])) {
                     return false;
                 } else if (Integer.parseInt(str1[i]) == Integer.parseInt(str2[i])) {
-
                 }
             }
         } else {

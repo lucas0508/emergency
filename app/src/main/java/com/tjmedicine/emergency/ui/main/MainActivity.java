@@ -24,6 +24,9 @@ import com.tjmedicine.emergency.common.base.ActivityManager;
 import com.tjmedicine.emergency.common.base.BaseActivity;
 import com.tjmedicine.emergency.common.cache.db.SQLiteHelper;
 import com.tjmedicine.emergency.common.dialog.DialogManage;
+import com.tjmedicine.emergency.common.global.GlobalConstants;
+import com.tjmedicine.emergency.common.net.HttpProvider;
+import com.tjmedicine.emergency.common.net.HttpsUtils;
 import com.tjmedicine.emergency.model.widget.CustomScrollViewPager;
 import com.tjmedicine.emergency.ui.uart.database.DatabaseHelper;
 import com.tjmedicine.emergency.utils.DevicePermissionsUtils;
@@ -46,9 +49,6 @@ import butterknife.OnClick;
 public class MainActivity extends BaseActivity {
 
 
-    private static final String TAG = "UARTService";
-
-
     @BindView(R.id.vp_content)
     CustomScrollViewPager mViewPager;
     MainViewPagerAdapter mAdapter;
@@ -61,25 +61,25 @@ public class MainActivity extends BaseActivity {
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
         mApp = new DialogManage(this);
 
-        //获取注册id
-        MobPush.getRegistrationId(new MobPushCallback<String>() {
-            @Override
-            public void onCallback(String data) {
-                System.out.println(Thread.currentThread().getId() + " RegistrationId:" + data);
-            }
-        });
 
         if (Build.VERSION.SDK_INT >= 21) {
             MobPush.setNotifyIcon(R.mipmap.ic_launcher);
         } else {
             MobPush.setNotifyIcon(R.mipmap.ic_launcher);
         }
-
         dealPushResponse(getIntent());
 
-        initPermission();
+        //initPermission();
         initViewPager();
 
+
+        if (Build.VERSION.SDK_INT >= 21) {
+            MobPush.setNotifyIcon(R.mipmap.ic_launcher);
+        } else {
+            MobPush.setNotifyIcon(R.mipmap.ic_launcher);
+        }
+        dealPushResponse(getIntent());
+// 数据库存储
 //        for (int i = 0; i < 10; i++) {
 //            Map<String,Object> stringObjectMap = new HashMap<>();
 //            stringObjectMap.put("id",System.currentTimeMillis()+i);
@@ -94,7 +94,21 @@ public class MainActivity extends BaseActivity {
 //
 //        // Logger.d("数据库中数据数量："+map1.size());
 //        Logger.d("数据库中数据："+new Gson().toJson(maps));
+        initRegistrationId();
 
+    }
+
+    /**
+     * 获取推送ID
+     */
+    private void initRegistrationId() {
+        MobPush.getRegistrationId(new MobPushCallback<String>() {
+            @Override
+            public void onCallback(String rid) {
+                System.out.println("RegistrationId:" + rid);
+                HttpProvider.doGet(GlobalConstants.APP_PUSH_ID + "?rid=" + rid, null);
+            }
+        });
     }
 
     public void initPermission() {
@@ -102,7 +116,6 @@ public class MainActivity extends BaseActivity {
             @Override
             public void onGranted() {
                 Logger.d("权限允许--cityCode->");
-
             }
 
             @Override
@@ -113,8 +126,6 @@ public class MainActivity extends BaseActivity {
             }
         });
     }
-
-
 
 
     @Override
@@ -140,7 +151,6 @@ public class MainActivity extends BaseActivity {
             case R.id.rb_tab_menu_material:
                 mViewPager.setCurrentItem(1);
                 break;
-
             case R.id.rb_tab_menu_mypage:
                 mViewPager.setCurrentItem(2);
                 break;

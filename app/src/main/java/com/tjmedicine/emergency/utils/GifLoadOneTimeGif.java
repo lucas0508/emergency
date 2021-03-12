@@ -27,13 +27,12 @@ public class GifLoadOneTimeGif {
      * @param loopCount 播放次数
      * @param gifListener  Gif播放完毕回调
      */
-    public static void loadOneTimeGif(Context context, Object model, final ImageView imageView , int loopCount, final GifListener gifListener) {
+    public static void loadOneTimeGif(Context context, Object model, final ImageView imageView, int loopCount, final GifListener gifListener) {
         Glide.with(context).asGif().load(model).listener(new RequestListener<GifDrawable>() {
             @Override
             public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<GifDrawable> target, boolean isFirstResource) {
                 return false;
             }
-
             @Override
             public boolean onResourceReady(GifDrawable resource, Object model, Target<GifDrawable> target, DataSource dataSource, boolean isFirstResource) {
                 try {

@@ -2,10 +2,7 @@ package com.tjmedicine.emergency.common.global;
 
 import android.os.Environment;
 
-/**
- * @Date on 2019/1/8.
- * @Author by xrf05.
- */
+
 public class Constants {
     public static final String LOGGER_TAG = "121";
     public static final int CAMERA_PERMISSIONS_REQUEST_CODE = 21;
@@ -18,7 +15,12 @@ public class Constants {
     /* WebActivity  key */
     public static final String WEB_KEY_URL = "WEB_URL";
     public static final String WEB_KEY_TITLE = "WEB_TITLE";
+
     public static final String WEB_KEY_FLAG = "WEB_FLAG";
+
+    //1.线下活动，2.直播，3.其他
+    public static final String WEB_KEY_TYPE = "WEB_TYPE";
+
 
     /**
      * KEY- 缓存 闪屏页图片
@@ -29,4 +31,7 @@ public class Constants {
     public static final int MAPROLE_VOLUNTEER = 1;
     public static final int MAPROLE_DOCTOR = 2;
     public static final int MAPROLE_AED = 3;
+
+    public static final String B_BLE_START = "b_ble_start";
+    public static final String B_BLE_END = "b_ble_end";
 }

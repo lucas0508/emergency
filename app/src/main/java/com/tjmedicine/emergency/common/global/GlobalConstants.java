@@ -1,17 +1,15 @@
 package com.tjmedicine.emergency.common.global;
 
 
-/**
- * @Date on 2019/1/8.
- * @Author by xrf05.
- */
 public class GlobalConstants {
 
 
-//  public static final String BASE_SERVER_ = "https://www.jiaogegongren.com";
+//  public static final String BASE_SERVER_ = "https://www.mengyuanyiliao.com";
 
-    public static final String BASE_SERVER_ = "http://192.168.1.150:8081";
 
+    public static final String BASE_SERVER_ = "http://39.104.170.185:8081";
+//
+//    public static final String BASE_SERVER_ = "http://192.168.1.150:8081";
 
     /**
      * 七牛云
@@ -21,11 +19,10 @@ public class GlobalConstants {
     /**
      * 七牛云
      */
-    public static final String BASE_QI_NIU_URL = "qm4ptorva.hn-bkt.clouddn.com";
+    public static final String BASE_QI_NIU_URL = "http://qnbajfh7n.hn-bkt.clouddn.com";
 
 
     public static final String BASE_SERVER_URL = BASE_SERVER_ + "/mobile";
-
 
     /**
      * 登录
@@ -53,19 +50,19 @@ public class GlobalConstants {
     /**
      * 退出登录
      */
-    public static final String APP_LOGOUT = BASE_SERVER_URL + "/logout";
+    public static final String APP_LOGOUT = BASE_SERVER_URL + "/user/logout";
 
 
     /**
      * 用户协议
      */
-    public static final String AGREEMENT_URL = "https://www.jiaogegongren.com/h5/agreement/user_privacy.html";
+    public static final String AGREEMENT_URL = BASE_QI_NIU_URL + "/privacy.html";
 
 
-    /**
-     * 隐私政策
-     */
-    public static final String PRIVACYPOLICY_URL = "https://www.jiaogegongren.com/h5/agreement/user_serving.html";
+//    /**
+//     * 隐私政策
+//     */
+//    public static final String PRIVACYPOLICY_URL = "https://www.jiaogegongren.com/h5/agreement/user_serving.html";
 
     /**
      * 问题反馈
@@ -76,7 +73,7 @@ public class GlobalConstants {
     /**
      * 版本更新
      */
-    public static final String APP_VERSION_UPDATE = "/user/app/version";
+    public static final String APP_VERSION_UPDATE = BASE_SERVER_URL + "/user/app/version";
 
 
     //----------------------------------------模拟人----------------------------------------------------------------
@@ -165,7 +162,7 @@ public class GlobalConstants {
     /**
      * 活动报名
      */
-    public static final String APP_USER_SIGNUP = BASE_SERVER_URL + "/course/signUp";
+    public static final String APP_USER_SIGNUP = BASE_SERVER_URL + "/course/signUp?activityId=";
 
 
     /**
@@ -195,6 +192,21 @@ public class GlobalConstants {
      * 更新位置信息
      */
     public static final String APP_USER_UPDATE_ADDRESS = BASE_SERVER_URL + "/user/updateAddress";
+
+
+    /**
+     * 埋点
+     * b_ble_start
+     * b_ble_end
+     */
+    public static final String APP_BURIED_POINT = BASE_SERVER_URL + "/train/count?type=";
+
+
+    /**
+     * 发送服务器推送id
+     */
+    public static final String APP_PUSH_ID = BASE_SERVER_URL + "/user/addRid";
+
 }
 
 

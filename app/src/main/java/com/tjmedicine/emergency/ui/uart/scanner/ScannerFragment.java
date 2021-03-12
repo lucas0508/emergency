@@ -26,16 +26,30 @@ import android.app.Dialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.ParcelUuid;
+import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -44,8 +58,20 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.DialogFragment;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import com.airbnb.lottie.LottieAnimationView;
+import com.lxj.xpopup.XPopup;
+import com.tjmedicine.emergency.EmergencyApplication;
 import com.tjmedicine.emergency.R;
+import com.tjmedicine.emergency.common.base.OnMultiClickListener;
+import com.tjmedicine.emergency.common.dialog.CustomFullScreenPopup;
+import com.tjmedicine.emergency.common.dialog.CustomLoadingFullScreenPopup;
+import com.tjmedicine.emergency.ui.main.MainActivity;
+import com.tjmedicine.emergency.ui.uart.UARTService;
+import com.tjmedicine.emergency.ui.uart.profile.BleProfileService;
+import com.tjmedicine.emergency.ui.uart.profile.UARTInterface;
+import com.tjmedicine.emergency.utils.ToastUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,7 +93,6 @@ import no.nordicsemi.android.support.v18.scanner.ScanSettings;
  */
 public class ScannerFragment extends DialogFragment {
     private final static String TAG = "ScannerFragment";
-
     private final static String PARAM_UUID = "param_uuid";
     private final static long SCAN_DURATION = 5000;
 
@@ -78,17 +103,59 @@ public class ScannerFragment extends DialogFragment {
     private DeviceListAdapter adapter;
     private final Handler handler = new Handler();
     private Button scanButton;
-
+    LottieAnimationView lav;
     private View permissionRationale;
 
     private ParcelUuid uuid;
 
     private boolean scanning = false;
     AlertDialog dialog = null;
+    CustomFullScreenPopup customFullScreenPopup;
+    CustomLoadingFullScreenPopup customLoadingFullScreenPopup;
+    private static IntentFilter makeIntentFilter() {
+        final IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(BleProfileService.BROADCAST_CONNECTION_STATE);
+        intentFilter.addAction(BleProfileService.BROADCAST_SERVICES_DISCOVERED);
+        intentFilter.addAction(BleProfileService.BROADCAST_DEVICE_READY);
+        intentFilter.addAction(BleProfileService.BROADCAST_BOND_STATE);
+        intentFilter.addAction(BleProfileService.BROADCAST_ERROR);
+        return intentFilter;
+    }
+//
+//    /**
+//     * 用volatile修饰的变量，
+//     * 线程在每次使用变量的时候，都会读取变量修改后的最的值。
+//     * volatile很容易被误用，用来进行原子性操作。
+//     */
+//    private static volatile ScannerFragment scannerFragment = null;
+//
+//    /**
+//     * 单例模式：创建  Fragment：
+//     *
+//     * @return
+//     */
+//    public static ScannerFragment getInstance(final UUID uuid) {
+//        if (scannerFragment == null) {
+//            synchronized (ScannerFragment.class) {
+//                if (scannerFragment == null) {
+//                    scannerFragment = new ScannerFragment();
+//                }
+//            }
+//        }
+//        final Bundle args = new Bundle();
+//        if (uuid != null)
+//            args.putParcelable(PARAM_UUID, new ParcelUuid(uuid));
+//        scannerFragment.setArguments(args);
+//        return scannerFragment;
+//    }
+
 
     public static ScannerFragment getInstance(final UUID uuid) {
-        final ScannerFragment fragment = new ScannerFragment();
 
+        ScannerFragment fragment = null;
+        if (fragment == null) {
+            fragment = new ScannerFragment();
+        }
         final Bundle args = new Bundle();
         if (uuid != null)
             args.putParcelable(PARAM_UUID, new ParcelUuid(uuid));
@@ -132,7 +199,7 @@ public class ScannerFragment extends DialogFragment {
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+//        setStyle(DialogFragment.STYLE_NORMAL,R.style.fullscreen_dialog);
         final Bundle args = getArguments();
         if (args != null && args.containsKey(PARAM_UUID)) {
             uuid = args.getParcelable(PARAM_UUID);
@@ -142,34 +209,55 @@ public class ScannerFragment extends DialogFragment {
         if (manager != null) {
             bluetoothAdapter = manager.getAdapter();
         }
+
     }
+
 
     @Override
     public void onDestroyView() {
         stopScan();
+        dismiss();
         super.onDestroyView();
     }
+
 
     @NonNull
     @Override
     public Dialog onCreateDialog(final Bundle savedInstanceState) {
-        final AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        final AlertDialog.Builder builder = new AlertDialog.Builder(requireContext()
+                , R.style.fullscreen_dialog);
         final View dialogView = LayoutInflater.from(requireContext())
                 .inflate(R.layout.fragment_device_selection, null);
         final ListView listview = dialogView.findViewById(android.R.id.list);
-
+        final ImageButton close = dialogView.findViewById(R.id.ib_close);
+        lav = dialogView.findViewById(R.id.lav);
         listview.setEmptyView(dialogView.findViewById(android.R.id.empty));
         listview.setAdapter(adapter = new DeviceListAdapter());
 
-        builder.setTitle(R.string.scanner_title);
+        // title.setText(R.string.scanner_title);
         dialog = builder.setView(dialogView).create();
         listview.setOnItemClickListener((parent, view, position, id) -> {
-            stopScan();
-            dialog.dismiss();
-            final ExtendedBluetoothDevice d = (ExtendedBluetoothDevice) adapter.getItem(position);
-            listener.onDeviceSelected(d.device, d.name);
-        });
 
+
+            listview.post(new Runnable() {
+                @Override
+                public void run() {
+                    //stopScan();
+                    customLoadingFullScreenPopup.dismiss();
+                    final ExtendedBluetoothDevice d = (ExtendedBluetoothDevice) adapter.getItem(position);
+                    listener.onDeviceSelected(d.device, d.name);
+                    customFullScreenPopup = new CustomFullScreenPopup(requireActivity());
+                    new XPopup.Builder(requireActivity()).asCustom(customFullScreenPopup).show();
+                }
+            });
+        });
+        Window window = dialog.getWindow();
+        window.getDecorView().setPadding(0, 0, 0, 0); //消除边距
+
+        WindowManager.LayoutParams lp = window.getAttributes();
+        lp.width = WindowManager.LayoutParams.MATCH_PARENT;   //设置宽度充满屏幕
+        lp.height = WindowManager.LayoutParams.MATCH_PARENT;
+        window.setAttributes(lp);
         permissionRationale = dialogView.findViewById(R.id.permission_rationale); // this is not null only on API23+
 
         scanButton = dialogView.findViewById(R.id.action_cancel);
@@ -178,14 +266,25 @@ public class ScannerFragment extends DialogFragment {
                 if (scanning) {
                     dialog.cancel();
                 } else {
+                    lav.setVisibility(View.VISIBLE);
                     startScan();
                 }
             }
         });
-
         addBoundDevices();
-        if (savedInstanceState == null)
+        if (savedInstanceState == null) {
+            LocalBroadcastManager.getInstance(requireActivity()).registerReceiver(commonBroadcastReceiver, makeIntentFilter());
             startScan();
+            lav.setVisibility(View.VISIBLE);
+        }
+        dialog.setCancelable(false);
+        close.setOnClickListener(new OnMultiClickListener() {
+            @Override
+            public void onMultiClick(View v) {
+                Intent intent = new Intent(requireActivity(), MainActivity.class);
+                startActivity(intent);
+            }
+        });
         return dialog;
     }
 
@@ -238,6 +337,8 @@ public class ScannerFragment extends DialogFragment {
 
         adapter.clearDevices();
         scanButton.setText(R.string.scanner_action_cancel);
+        customLoadingFullScreenPopup = new CustomLoadingFullScreenPopup(requireActivity());
+        new XPopup.Builder(requireActivity()).asCustom(customLoadingFullScreenPopup).show();
 
         final BluetoothLeScannerCompat scanner = BluetoothLeScannerCompat.getScanner();
         final ScanSettings settings = new ScanSettings.Builder()
@@ -250,6 +351,7 @@ public class ScannerFragment extends DialogFragment {
         scanning = true;
         handler.postDelayed(() -> {
             if (scanning) {
+                customLoadingFullScreenPopup.dismiss();
                 stopScan();
             }
         }, SCAN_DURATION);
@@ -261,13 +363,11 @@ public class ScannerFragment extends DialogFragment {
     private void stopScan() {
         if (scanning) {
             scanButton.setText(R.string.scanner_action_scan);
-
+            lav.setVisibility(View.GONE);
             final BluetoothLeScannerCompat scanner = BluetoothLeScannerCompat.getScanner();
             scanner.stopScan(scanCallback);
-
             scanning = false;
         }
-
     }
 
     private ScanCallback scanCallback = new ScanCallback() {
@@ -283,6 +383,8 @@ public class ScannerFragment extends DialogFragment {
 
         @Override
         public void onScanFailed(final int errorCode) {
+
+
             // should never be called
         }
     };
@@ -290,5 +392,198 @@ public class ScannerFragment extends DialogFragment {
     private void addBoundDevices() {
         final Set<BluetoothDevice> devices = bluetoothAdapter.getBondedDevices();
         adapter.addBondedDevices(devices);
+    }
+
+
+    public void onServiceStarted() {
+        // The service has been started, bind to it
+        final Intent service = new Intent(getActivity(), UARTService.class);
+        requireActivity().bindService(service, serviceConnection, 0);
+    }
+
+    private UARTService.UARTBinder bleService;
+
+    private UARTInterface uartInterface;
+
+    private ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(final ComponentName name, final IBinder service) {
+            bleService = (UARTService.UARTBinder) service;
+
+            Log.e(TAG, "Fragment: ------------------------------");
+
+            Log.d(TAG, "Fragment: ------------------------------" + bleService.getDeviceAddress());
+
+            Log.d(TAG, "Fragment: ------------------------------" + bleService.getDeviceName());
+
+
+            Log.d(TAG, "Fragment: ------------------------------" + bleService.getConnectionState());
+
+            Log.e(TAG, "Fragment: ------------------------------");
+            uartInterface = bleService;
+
+//            if (bleService.isConnected()) {
+//                Log.e(TAG, "Fragment: -----------------已经连接成功-------------");
+//            }
+
+
+//			logSession = bleService.getLogSession();
+
+            // Start the loader
+			/*if (logSession != null) {
+				getLoaderManager().restartLoader(LOG_REQUEST_ID, null, UARTLogFragment.this);
+			}*/
+
+            // and notify user if device is connected
+//			if (bleService.isConnected())
+//				onDeviceConnected();
+        }
+
+        @Override
+        public void onServiceDisconnected(final ComponentName name) {
+//			onDeviceDisconnected();
+            uartInterface = null;
+
+//            Log.e(TAG, "Fragment: -----------------连接失败-------------" + bleService.getConnectionState());
+//            if (bleService.isConnected()) {
+//                Log.e(TAG, "Fragment: -----------------连接失败-------------");
+//            }
+
+//            if (bleService.getConnectionState()==0){
+//                customFullScreenPopup.dismiss();
+//            }
+        }
+    };
+
+
+    private final BroadcastReceiver commonBroadcastReceiver = new BroadcastReceiver() {
+
+        private boolean flag = true;//加个标志，否则onReceive方法会重复接收通知
+
+        @Override
+        public void onReceive(final Context context, final Intent intent) {
+//            if (flag) {
+//                flag = false;
+            // Check if the broadcast applies the connected device
+            if (!isBroadcastForThisDevice(intent))
+                return;
+
+            final BluetoothDevice bluetoothDevice = intent.getParcelableExtra(BleProfileService.EXTRA_DEVICE);
+            if (bluetoothDevice == null)
+                return;
+
+            final String action = intent.getAction();
+            switch (action) {
+                case BleProfileService.BROADCAST_CONNECTION_STATE: {
+                    final int state = intent.getIntExtra(BleProfileService.EXTRA_CONNECTION_STATE, BleProfileService.STATE_DISCONNECTED);
+
+                    switch (state) {
+                        case BleProfileService.STATE_CONNECTED: {
+                            new Handler().postDelayed(new Runnable() {
+                                public void run() {
+                                    ToastUtils.showTextToas(EmergencyApplication.getContext(), "设备连接成功~");
+                                    Log.e(TAG, " --BleProFileService---onReceive:-------> " + "设备连接success");
+                                    if (null != customFullScreenPopup) {
+                                        customFullScreenPopup.dismiss();
+                                    }
+                                    dialog.dismiss();
+//                                    requireActivity().unregisterReceiver(commonBroadcastReceiver);
+                                }
+                            }, 2000);
+                            break;
+                        }
+                        case BleProfileService.STATE_DISCONNECTED: {
+                            ToastUtils.showTextToas(EmergencyApplication.getContext(), "设备断开连接~");
+                            Log.e(TAG, " --BleProFileService---onReceive:-------> " + "设备断开连接");
+                            if (null != customFullScreenPopup) {
+                                customFullScreenPopup.dismiss();
+                            }
+                            break;
+                        }
+                        case BleProfileService.STATE_LINK_LOSS: {
+                            Log.e(TAG, " --BleProFileService---onReceive:------STATE_LINK_LOSS-> ");
+                            break;
+                        }
+                        case BleProfileService.STATE_CONNECTING: {
+//                            ToastUtils.showTextToas(EmergencyApplication.getContext(), "设备正在连接中~");
+                            Log.e(TAG, " --BleProFileService---onReceive:-------> " + "设备正在连接");
+                            break;
+                        }
+                        case BleProfileService.STATE_DISCONNECTING: {
+                            Log.e(TAG, " --BleProFileService---onReceive:------STATE_DISCONNECTING-> ");
+//                            customFullScreenPopup.dismiss();
+                            break;
+                        }
+                        default:
+                            // there should be no other actions
+                            break;
+                    }
+                    break;
+                }
+//                case BleProfileService.BROADCAST_SERVICES_DISCOVERED: {
+//                    final boolean primaryService = intent.getBooleanExtra(BleProfileService.EXTRA_SERVICE_PRIMARY, false);
+//                    final boolean secondaryService = intent.getBooleanExtra(BleProfileService.EXTRA_SERVICE_SECONDARY, false);
+//
+//                    if (primaryService) {
+//                        onServicesDiscovered(bluetoothDevice, secondaryService);
+//                    } else {
+//                        onDeviceNotSupported(bluetoothDevice);
+//                    }
+//                    break;
+//                }
+//                case BleProfileService.BROADCAST_DEVICE_READY: {
+//                    onDeviceReady(bluetoothDevice);
+//                    break;
+//                }
+//                case BleProfileService.BROADCAST_BOND_STATE: {
+//                    final int state = intent.getIntExtra(BleProfileService.EXTRA_BOND_STATE, BluetoothDevice.BOND_NONE);
+//                    switch (state) {
+//                        case BluetoothDevice.BOND_BONDING:
+//                            onBondingRequired(bluetoothDevice);
+//                            break;
+//                        case BluetoothDevice.BOND_BONDED:
+//                            onBonded(bluetoothDevice);
+//                            break;
+//                    }
+//                    break;
+//                }
+//                case BleProfileService.BROADCAST_ERROR: {
+//                    final String message = intent.getStringExtra(BleProfileService.EXTRA_ERROR_MESSAGE);
+//                    final int errorCode = intent.getIntExtra(BleProfileService.EXTRA_ERROR_CODE, 0);
+//                    onError(bluetoothDevice, message, errorCode);
+//                    break;
+//                }
+            }
+        }
+//        }
+    };
+
+    /**
+     * Checks the {@link BleProfileService#EXTRA_DEVICE} in the given intent and compares it with the connected BluetoothDevice object.
+     *
+     * @param intent intent received via a broadcast from the service
+     * @return true if the data in the intent apply to the connected device, false otherwise
+     */
+    protected boolean isBroadcastForThisDevice(final Intent intent) {
+        final BluetoothDevice bluetoothDevice = intent.getParcelableExtra(BleProfileService.EXTRA_DEVICE);
+        return bluetoothDevice != null && bluetoothDevice.equals(bluetoothDevice);
+    }
+
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        dismiss();
+    }
+
+    @Override
+    public void dismiss() {
+        super.dismiss();
+        try {
+            LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(commonBroadcastReceiver);
+        } catch (Exception e) {
+            // TODO: handle exception
+        }
+
     }
 }

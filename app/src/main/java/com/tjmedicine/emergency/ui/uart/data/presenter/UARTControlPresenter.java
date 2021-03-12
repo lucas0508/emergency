@@ -29,7 +29,7 @@ public class UARTControlPresenter extends BasePresenter {
             @Override
             public void callback(ResponseEntity res) {
                 if (HttpProvider.isSuccessful(res.getCode())) {
-                    iuartControlView.postUARTDataSuccess((String) res.getData());
+                    iuartControlView.postUARTDataSuccess((Double) res.getData());
                 } else {
                     iuartControlView.postUARTDataFail(res.getMsg());
                 }
