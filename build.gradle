@@ -27,7 +27,8 @@ allprojects {
         maven {
             url "http://mvn.mob.com/android"
         }
-
+        maven { url "https://raw.githubusercontent.com/Pgyer/mvn_repo_pgyer/master" } // 主用仓库
+        maven { url 'https://gitee.com/pgyer2020/analytics/raw/master' }  // 备用仓库
         maven { url 'https://jitpack.io' }
         maven { url 'https://maven.google.com' }
         jcenter()

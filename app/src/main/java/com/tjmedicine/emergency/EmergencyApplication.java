@@ -104,7 +104,6 @@ public class EmergencyApplication extends MultiDexApplication {
                     msg.what = 1;
                     msg.obj = "Message Receive:" + message.toString();
                     handler.sendMessage(msg);
-
                 }
 
                 @Override
@@ -150,7 +149,6 @@ public class EmergencyApplication extends MultiDexApplication {
     private static void init(){
         new PgyerSDKManager.InitSdk()
                 .setContext(context) //设置上下问对象
-                .enable(FeatureEnum.CHECK_UPDATE)  //添加检查新版本
                 .build();
     }
 

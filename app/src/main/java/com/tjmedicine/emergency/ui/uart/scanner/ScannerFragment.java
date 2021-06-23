@@ -112,6 +112,7 @@ public class ScannerFragment extends DialogFragment {
     AlertDialog dialog = null;
     CustomFullScreenPopup customFullScreenPopup;
     CustomLoadingFullScreenPopup customLoadingFullScreenPopup;
+
     private static IntentFilter makeIntentFilter() {
         final IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(BleProfileService.BROADCAST_CONNECTION_STATE);
@@ -395,67 +396,6 @@ public class ScannerFragment extends DialogFragment {
     }
 
 
-    public void onServiceStarted() {
-        // The service has been started, bind to it
-        final Intent service = new Intent(getActivity(), UARTService.class);
-        requireActivity().bindService(service, serviceConnection, 0);
-    }
-
-    private UARTService.UARTBinder bleService;
-
-    private UARTInterface uartInterface;
-
-    private ServiceConnection serviceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(final ComponentName name, final IBinder service) {
-            bleService = (UARTService.UARTBinder) service;
-
-            Log.e(TAG, "Fragment: ------------------------------");
-
-            Log.d(TAG, "Fragment: ------------------------------" + bleService.getDeviceAddress());
-
-            Log.d(TAG, "Fragment: ------------------------------" + bleService.getDeviceName());
-
-
-            Log.d(TAG, "Fragment: ------------------------------" + bleService.getConnectionState());
-
-            Log.e(TAG, "Fragment: ------------------------------");
-            uartInterface = bleService;
-
-//            if (bleService.isConnected()) {
-//                Log.e(TAG, "Fragment: -----------------已经连接成功-------------");
-//            }
-
-
-//			logSession = bleService.getLogSession();
-
-            // Start the loader
-			/*if (logSession != null) {
-				getLoaderManager().restartLoader(LOG_REQUEST_ID, null, UARTLogFragment.this);
-			}*/
-
-            // and notify user if device is connected
-//			if (bleService.isConnected())
-//				onDeviceConnected();
-        }
-
-        @Override
-        public void onServiceDisconnected(final ComponentName name) {
-//			onDeviceDisconnected();
-            uartInterface = null;
-
-//            Log.e(TAG, "Fragment: -----------------连接失败-------------" + bleService.getConnectionState());
-//            if (bleService.isConnected()) {
-//                Log.e(TAG, "Fragment: -----------------连接失败-------------");
-//            }
-
-//            if (bleService.getConnectionState()==0){
-//                customFullScreenPopup.dismiss();
-//            }
-        }
-    };
-
-
     private final BroadcastReceiver commonBroadcastReceiver = new BroadcastReceiver() {
 
         private boolean flag = true;//加个标志，否则onReceive方法会重复接收通知
@@ -483,11 +423,16 @@ public class ScannerFragment extends DialogFragment {
                                 public void run() {
                                     ToastUtils.showTextToas(EmergencyApplication.getContext(), "设备连接成功~");
                                     Log.e(TAG, " --BleProFileService---onReceive:-------> " + "设备连接success");
+                                    final UARTInterface uart = (UARTInterface) requireActivity();
+                                    uart.send("<Battery?>");
+                                    uart.send("<ZeroPressCal?>");
+//                                    uart.send("<FWVer?>");
+//                                    uart.send("<HWVer?>");
                                     if (null != customFullScreenPopup) {
                                         customFullScreenPopup.dismiss();
                                     }
                                     dialog.dismiss();
-//                                    requireActivity().unregisterReceiver(commonBroadcastReceiver);
+                                    //requireActivity().unregisterReceiver(commonBroadcastReceiver);
                                 }
                             }, 2000);
                             break;

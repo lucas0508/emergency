@@ -49,6 +49,9 @@
         <!--			tools:layout="@layout/fragment_feature_uart_control_score"-->
         <!--			/>-->
 
+
+
+
         <androidx.slidingpanelayout.widget.SlidingPaneLayout
             android:id="@+id/sliding_pane"
             android:layout_width="match_parent"
@@ -67,5 +70,50 @@
 
 
     </FrameLayout>
+
+    <RelativeLayout
+        android:visibility="gone"
+        android:id="@+id/rl_base_layout"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@color/white"
+        android:elevation="4dp"
+        android:gravity="center_vertical">
+
+        <ImageButton
+            android:id="@+id/ib_close"
+            android:layout_width="55dp"
+            android:layout_height="match_parent"
+            android:layout_centerVertical="true"
+            android:background="@null"
+            android:padding="20dp"
+            android:scaleType="center"
+            android:src="@mipmap/icon_back" />
+
+        <TextView
+            android:id="@+id/tv_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_marginTop="20dp"
+            android:text="模拟人练习"
+            android:textColor="#333333"
+            android:textSize="18sp" />
+
+        <Button
+            android:id="@+id/action_connect"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignParentEnd="true"
+            android:layout_centerInParent="true"
+            android:layout_centerHorizontal="true"
+            android:background="@null"
+            android:onClick="onConnectClicked"
+            android:paddingEnd="10dp"
+            android:text="点击连接模拟人"
+            android:visibility="gone" />
+
+    </RelativeLayout>
+
 
 </RelativeLayout>

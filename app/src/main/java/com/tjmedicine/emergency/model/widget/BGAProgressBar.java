@@ -266,8 +266,9 @@ public class BGAProgressBar extends ProgressBar {
     private void calculateTextWidthAndHeight() {
         //fix by Michael 修改参数溢出问题。
         //mText = String.format("%d", getProgress() * 100 / getMax()) + "%";
+        mText = String.format("%d", getProgress()) + "次";
 //        mText = String.format("%d", (int) (getProgress() * 1.0f / getMax() * 100)) + "%";
-        mText = String.format("%d", (int) (getProgress() * 1.0f / getMax() * 100)) ;
+//        mText = String.format("%d", (int) (getProgress() * 1.0f / getMax() * 100)) ;
         mPaint.setTextSize(mTextSize);
         mPaint.setStyle(Paint.Style.FILL);
 
@@ -283,7 +284,6 @@ public class BGAProgressBar extends ProgressBar {
         Comet,
         Wave
     }
-
     public static int dp2px(Context context, float dpValue) {
         return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dpValue, context.getResources().getDisplayMetrics());
     }

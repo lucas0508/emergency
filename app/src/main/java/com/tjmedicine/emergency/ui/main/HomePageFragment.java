@@ -15,6 +15,7 @@ import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -64,6 +65,7 @@ import com.amap.api.navi.AmapNaviParams;
 import com.amap.api.navi.AmapNaviType;
 import com.amap.api.navi.INaviInfoCallback;
 import com.amap.api.navi.model.AMapNaviLocation;
+import com.google.gson.Gson;
 import com.lxj.xpopup.XPopup;
 import com.orhanobut.logger.Logger;
 import com.tjmedicine.emergency.EmergencyApplication;
@@ -75,6 +77,7 @@ import com.tjmedicine.emergency.common.bean.MapDataBeen;
 import com.tjmedicine.emergency.common.cache.SharedPreferences.UserInfo;
 import com.tjmedicine.emergency.common.dialog.DialogManage;
 import com.tjmedicine.emergency.common.dialog.DistanceDialog;
+import com.tjmedicine.emergency.common.dialog.TaskSucDialog;
 import com.tjmedicine.emergency.common.global.Constants;
 import com.tjmedicine.emergency.common.server.LocationService;
 import com.tjmedicine.emergency.ui.login.view.activity.LoginActivity;
@@ -89,7 +92,11 @@ import com.tjmedicine.emergency.ui.map.presenter.MapDataPresenter;
 import com.tjmedicine.emergency.ui.mseeage.systemInformation.SystemInformationActivity;
 import com.tjmedicine.emergency.ui.navi.NaviActivity;
 import com.tjmedicine.emergency.ui.navi.TabFragment;
+import com.tjmedicine.emergency.ui.uart.SettingActivity;
 import com.tjmedicine.emergency.ui.uart.UARTActivity;
+import com.tjmedicine.emergency.ui.uart.data.presenter.IUARTControlView;
+import com.tjmedicine.emergency.ui.uart.data.presenter.PDScoreData;
+import com.tjmedicine.emergency.ui.uart.data.presenter.UARTControlPresenter;
 import com.tjmedicine.emergency.utils.AnimUtil;
 import com.tjmedicine.emergency.utils.GifLoadOneTimeGif;
 
@@ -103,11 +110,12 @@ import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import cn.pedant.SweetAlert.SweetAlertDialog;
 
-import static me.jessyan.autosize.utils.AutoSizeUtils.dp2px;
+import static com.lxj.xpopup.util.XPopupUtils.dp2px;
 
 public class HomePageFragment extends BaseFragment implements AMap.OnMapLoadedListener, AMap.OnCameraChangeListener, LocationSource, AMapLocationListener, ClusterRender, ClusterClickListener, AMap.InfoWindowAdapter, AMap.OnMapClickListener, IMapDataView, INaviInfoCallback {
-
+    //    private UARTControlPresenter uartControlPresenter = new UARTControlPresenter(this);
     private static final int STROKE_COLOR = Color.argb(180, 3, 145, 255);
     private static final int FILL_COLOR = Color.argb(10, 0, 0, 180);
     private MapDataPresenter mapDataPresenter = new MapDataPresenter(this);
@@ -129,6 +137,8 @@ public class HomePageFragment extends BaseFragment implements AMap.OnMapLoadedLi
     ImageView iv_common_right;
     @BindView(R.id.iv_location)
     ImageView mLocation;
+    @BindView(R.id.ic_launcher)
+    ImageView ic_launcher;
     private AMap aMap;
     public View mView;
 
@@ -159,7 +169,12 @@ public class HomePageFragment extends BaseFragment implements AMap.OnMapLoadedLi
         if (mapView != null) {
             mapView.onSaveInstanceState(outState);
         }
+
+
+
     }
+
+
 
     @Nullable
     @Override
@@ -181,33 +196,87 @@ public class HomePageFragment extends BaseFragment implements AMap.OnMapLoadedLi
         mTitle.setText("121急救");
         init();
         initListener();
+
         return mView;
 
     }
 
     private void initListener() {
+        ic_launcher.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new SweetAlertDialog(getActivity(), SweetAlertDialog.WARNING_TYPE)
+                        .setTitleText("提示")
+                        .setContentText("使用最大校准之前，首先把模拟人放平，按压5秒之后松开")
+                        .setConfirmText("确定")
+                        .setCancelText("取消")
+                        .showCancelButton(true)
+                        .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                            @Override
+                            public void onClick(SweetAlertDialog sDialog) {
+                                mApp.shortToast("校准中······");
+//                                if (uartInterface != null) {
+//                                    uartInterface.send("<MaxPressCal>");
+//                                }
+                                new Handler().postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        sDialog.setTitleText("校准完成!")
+                                                .setConfirmText("确定")
+                                                .setConfirmClickListener(null)
+                                                .changeAlertType(SweetAlertDialog.SUCCESS_TYPE);
+                                    }
+                                }, 7000);
 
+                            }
+                        }).show();
+            }
+        });
         mDummy.setOnClickListener(new OnMultiClickListener() {
             @Override
             public void onMultiClick(View v) {
-
-                if (mApp.isLogin()) {
-                    mApp.getOptionDialog().show("请选择模式", new String[]{"1", "2"}, position -> {
-                        /**
-                         * type  1: 练习
-                         *       2：测试
-                         */
+                mApp.getOptionDialog().show("请选择模式", new String[]{"1", "2"}, position -> {
+                    /**
+                     * type  1: 练习
+                     *       2：测试
+                     *       3：考试
+                     */
+                    Bundle bundle = new Bundle();
+                    if (position == 0) {
+                        bundle.putString("mode", "1");
+                    } else if (position == 1) {
+                        bundle.putString("mode", "2");
+                    }
+//                    else if (position == 2) {
+//                        //添加实名认证
+//                        bundle.putString("mode", "3");
+//                    }
+                    startActivity(UARTActivity.class, bundle);
+                });
+                /*if (mApp.isLogin()) {
+                    mApp.getOptionDialog().show("请选择模式", new String[]{"1", "2","3"}, position -> {
+                        *//**
+                 * type  1: 练习
+                 *       2：测试
+                 *       3：考试
+                 *//*
                         Bundle bundle = new Bundle();
                         if (position == 0) {
                             bundle.putString("mode", "1");
                         } else if (position == 1) {
                             bundle.putString("mode", "2");
+                        } else if (position == 2) {
+                            //添加实名认证
+                            bundle.putString("mode", "3");
                         }
                         startActivity(UARTActivity.class, bundle);
                     });
-                } else {
-                    startActivity(LoginActivity.class);
                 }
+                else {
+                    startActivity(LoginActivity.class);
+                }*/
+
+
             }
         });
         mLocation.setOnClickListener(new OnMultiClickListener() {
@@ -238,6 +307,8 @@ public class HomePageFragment extends BaseFragment implements AMap.OnMapLoadedLi
 //                userOverlay(Constants.MAPROLE_AED);
                 AnimUtil.starAnim2(mAids);
                 mapDataPresenter.queryMapData(Constants.MAPROLE_AED);
+
+
             }
         });
 
@@ -489,7 +560,7 @@ public class HomePageFragment extends BaseFragment implements AMap.OnMapLoadedLi
         // dmPoint      我的点
         // dhPoint      目标点
         float distance = CoordinateConverter.calculateLineDistance(dmPoint, dhPoint);
-        BigDecimal bd = new BigDecimal(distance/ 1000);
+        BigDecimal bd = new BigDecimal(distance / 1000);
         //保留小数点后n位，并四舍五入
         bd = (bd).setScale(1, BigDecimal.ROUND_HALF_UP);
         if (cluster.getClusterCount() == 1 && clusterItems.get(0).getMapRole() == Constants.MAPROLE_AED) {
@@ -676,7 +747,7 @@ public class HomePageFragment extends BaseFragment implements AMap.OnMapLoadedLi
         int role = 0;
         for (MapDataBeen mapDataBeen : mapDataBeens) {
             LatLng latLng = new LatLng(mapDataBeen.getLat(), mapDataBeen.getLng(), false);
-            RegionItem regionItem = new RegionItem(latLng, mapDataBeen.getAddress(), mapDataBeen.getType(),mapDataBeen.getAddress());
+            RegionItem regionItem = new RegionItem(latLng, mapDataBeen.getAddress(), mapDataBeen.getType(), mapDataBeen.getAddress());
             role = mapDataBeen.getType();
             items.add(regionItem);
         }
@@ -801,4 +872,8 @@ public class HomePageFragment extends BaseFragment implements AMap.OnMapLoadedLi
     public View getCustomNaviBottomView() {
         return null;
     }
+
+
 }
+
+

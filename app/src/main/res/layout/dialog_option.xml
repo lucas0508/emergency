@@ -45,7 +45,7 @@
         <ListView
             android:layout_marginTop="28dp"
             android:id="@+id/lv_option"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:listSelector="@android:color/transparent"
             android:paddingBottom="10dp" />

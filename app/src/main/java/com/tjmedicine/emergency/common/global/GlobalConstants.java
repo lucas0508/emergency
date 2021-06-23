@@ -4,12 +4,12 @@ package com.tjmedicine.emergency.common.global;
 public class GlobalConstants {
 
 
-//  public static final String BASE_SERVER_ = "https://www.mengyuanyiliao.com";
+  public static final String BASE_SERVER_ = "https://www.mengyuanyiliao.com";
 
 
-    public static final String BASE_SERVER_ = "http://39.104.170.185:8081";
+//    public static final String BASE_SERVER_ = "http://39.104.170.185:8081";
 //
-//    public static final String BASE_SERVER_ = "http://192.168.1.150:8081";
+//            public static final String BASE_SERVER_ = "http://192.168.1.9:8081";
 
     /**
      * 七牛云
@@ -20,6 +20,7 @@ public class GlobalConstants {
      * 七牛云
      */
     public static final String BASE_QI_NIU_URL = "http://qnbajfh7n.hn-bkt.clouddn.com";
+
 
 
     public static final String BASE_SERVER_URL = BASE_SERVER_ + "/mobile";

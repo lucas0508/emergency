@@ -34,8 +34,8 @@ import com.tjmedicine.emergency.R;
 public class OptionDialog extends Dialog {
 
     private AlertDialog mDialog;
-    private Context mContext;
     private View mView;
+    private Context mContext;
     private ImageButton mClose;
     private TextView mTitle;
     private ListView mOption;
@@ -61,7 +61,8 @@ public class OptionDialog extends Dialog {
         Window window = dlg.getWindow();
         WindowManager.LayoutParams lp = window.getAttributes();
         lp.gravity = Gravity.CENTER_VERTICAL;
-        lp.width = 400;//宽高可设置具体大小
+//        lp.width = 400;//宽高可设置具体大小
+        lp.width = ViewGroup.LayoutParams.WRAP_CONTENT;//宽高可设置具体大小
         lp.height = ViewGroup.LayoutParams.WRAP_CONTENT;
         dlg.getWindow().setAttributes(lp);
     }
@@ -165,8 +166,14 @@ public class OptionDialog extends Dialog {
             if (position == 0) {
                 text.setText("练习模式");
                 image.setImageResource(R.mipmap.pop_practice);
-            } else if (position == 1) {
+            }
+            else if (position == 1) {
                 text.setText("测试模式");
+                image.setImageResource(R.mipmap.pop_test);
+
+            }
+            else if (position == 2) {
+                text.setText("考试模式");
                 image.setImageResource(R.mipmap.pop_test);
 
             }

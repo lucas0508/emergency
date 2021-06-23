@@ -14,10 +14,10 @@ import java.util.Map;
 public interface IUARTControlModel extends IBaseModel {
 
 
-    void sendUARTData(List<String> list, String type, final OnCallbackListener listener);
+    void sendUARTData(List<String> list, String type, List<String> listPD_trough, final OnCallbackListener listener);
 
 
-    void queryUARTList(Map<String, Object> info, String type,OnCallbackListener listener);
+    void queryUARTList(Map<String, Object> info, String type, OnCallbackListener listener);
 
 
     void queryUARTDataDetail(String trainId, OnCallbackListener listener);

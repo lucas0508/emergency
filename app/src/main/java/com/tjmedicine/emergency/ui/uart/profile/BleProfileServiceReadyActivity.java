@@ -213,7 +213,7 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
             Logger.d(logSession, "Activity bound to the service");
             onServiceBound(bleService);
 //
-//            UARTService.UARTBinder serviceBinder= (UARTService.UARTBinder) service;
+            serviceBinder= (UARTService.UARTBinder) service;
 //            //发送消息
 //            serviceBinder.send("<M>Start</M>");
 //
@@ -463,7 +463,7 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
                 //connectBLE();
             } else {
                 if (serviceBinder != null) {
-                    serviceBinder.send("<M>Stop</M>");
+                    serviceBinder.send("<M><TestStop></M>");
                 }
                 service.disconnect();
             }
@@ -670,7 +670,6 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
         Log.e("onDevice", " --BleProFileService---onReceive:-------> " + "设备连接中...");
     }
 
-    private UARTInterface uartInterface;
 
 
     @Override
@@ -681,14 +680,11 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
 
 
         Log.e("onDevice", " --BleProFileService---onReceive:-------> " + "设备连接");
-//            UARTService.UARTBinder serviceBinder= (UARTService.UARTBinder) service;
-//            //发送消息
-//            serviceBinder.send("<M>Start</M>");
-
+//        initUARTRobot();
 //
 //        startActivity(new Intent(BleProfileServiceReadyActivity.this, UARTRobotActivity.class));
-
     }
+
 
     @Override
     public void onDeviceDisconnecting(@NonNull final BluetoothDevice device) {
@@ -737,7 +733,18 @@ public abstract class BleProfileServiceReadyActivity<E extends BleProfileService
     public void onDeviceReady(@NonNull final BluetoothDevice device) {
         // empty default implementation
         Log.e("onDevice", " --BleProFileService---onReceive:-------> " + "33333");
+    }
 
+    private void initUARTRobot() {
+        runOnUiThread(() -> {
+            if (serviceBinder != null) {
+                Log.e("onDevice", " --BleProFileService---initUARTRobot:-------> " + "kaishi ");
+                serviceBinder.send("<Battery?>");
+                serviceBinder.send("<FWVer?>");
+                serviceBinder.send("<HWVer?>");
+                Log.e("onDevice", " --BleProFileService---initUARTRobot:-------> " + "jiesu ");
+            }
+        });
     }
 
     @Override

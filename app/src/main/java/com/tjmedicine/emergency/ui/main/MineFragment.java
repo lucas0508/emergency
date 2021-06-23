@@ -1,5 +1,6 @@
 package com.tjmedicine.emergency.ui.main;
 
+import android.os.CountDownTimer;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.ImageButton;
@@ -23,10 +24,12 @@ import com.tjmedicine.emergency.ui.mine.health.HealthFileActivity;
 import com.tjmedicine.emergency.ui.mine.volunteer.view.ApplyVolunteerActivity;
 import com.tjmedicine.emergency.ui.other.AboutActivity;
 import com.tjmedicine.emergency.ui.other.AccessFeedbackActivity;
+import com.tjmedicine.emergency.ui.uart.SettingActivity;
 import com.tjmedicine.emergency.utils.ToastUtils;
 
 import butterknife.BindView;
 import butterknife.OnClick;
+import cn.pedant.SweetAlert.SweetAlertDialog;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MineFragment extends BaseFragment {
@@ -47,6 +50,7 @@ public class MineFragment extends BaseFragment {
     @BindView(R.id.civ_header)
     CircleImageView mHeader;
     CustomDjsFullScreenPopup customDjsFullScreenPopup;
+    private int i = -1;
 
     @Override
     protected void initView() {
@@ -89,7 +93,7 @@ public class MineFragment extends BaseFragment {
     }
 
     @OnClick({R.id.btn_login, R.id.ll_my_apply, R.id.ll_my_verified, R.id.ll_my_health_file,
-            R.id.ll_about_us, R.id.ll_feedback, R.id.tv_apply_volunteer,R.id.tv_verified
+            R.id.ll_about_us, R.id.ll_feedback, R.id.tv_apply_volunteer, R.id.tv_verified
             , R.id.tv_set_emergency_contact, R.id.ll_login_success, R.id.civ_header})
     public void initOnClick(View view) {
         switch (view.getId()) {
@@ -146,6 +150,7 @@ public class MineFragment extends BaseFragment {
                 break;
             case R.id.ll_about_us:
                 startActivity(AboutActivity.class);
+
                 break;
             case R.id.ll_feedback:
                 if (mApp.isLogin()) {
@@ -153,7 +158,25 @@ public class MineFragment extends BaseFragment {
                 } else {
                     startActivity(LoginActivity.class);
                 }
+
+//                new SweetAlertDialog(requireActivity(), SweetAlertDialog.WARNING_TYPE)
+//                        .setTitleText("提示")
+//                        .setContentText("使用最大校准之前，首先把模拟人放平，按压5秒之后松开")
+//                        .setConfirmText("确定")
+//                        .setCancelText("取消")
+//                        .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+//                            @Override
+//                            public void onClick(SweetAlertDialog sDialog) {
+//                                sDialog
+//                                        .setTitleText("校准完成!")
+//                                        .setConfirmText("确定")
+//                                        .setConfirmClickListener(null)
+//                                        .changeAlertType(SweetAlertDialog.SUCCESS_TYPE);
+//                            }
+//                        })
+//                        .show();
                 break;
         }
     }
+
 }

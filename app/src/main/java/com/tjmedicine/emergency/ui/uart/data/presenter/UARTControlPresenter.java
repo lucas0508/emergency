@@ -1,8 +1,13 @@
 package com.tjmedicine.emergency.ui.uart.data.presenter;
 
+import android.util.Log;
+
+import com.orhanobut.logger.Logger;
 import com.tjmedicine.emergency.common.base.BasePresenter;
 import com.tjmedicine.emergency.common.base.IBaseModel;
+import com.tjmedicine.emergency.common.dialog.DialogUtil;
 import com.tjmedicine.emergency.common.net.HttpProvider;
+import com.tjmedicine.emergency.common.net.ResponseDataEntity;
 import com.tjmedicine.emergency.common.net.ResponseEntity;
 import com.tjmedicine.emergency.ui.login.model.ILoginModel;
 import com.tjmedicine.emergency.ui.uart.data.model.IUARTControlModel;
@@ -24,12 +29,13 @@ public class UARTControlPresenter extends BasePresenter {
         this.iuartControlView = iuartControlView;
     }
 
-    public void postUARTData(List<String> list, String type) {
-        iuartControlModel.sendUARTData(list, type, new IBaseModel.OnCallbackListener() {
+    public void postUARTData(List<String> list, String type,List<String> listPD_trough) {
+        iuartControlModel.sendUARTData(list, type,listPD_trough, new IBaseModel.OnCallbackListener() {
             @Override
             public void callback(ResponseEntity res) {
                 if (HttpProvider.isSuccessful(res.getCode())) {
-                    iuartControlView.postUARTDataSuccess((Double) res.getData());
+                     PDScoreData data = (PDScoreData) res.getData();
+                    iuartControlView.postUARTDataSuccess(data);
                 } else {
                     iuartControlView.postUARTDataFail(res.getMsg());
                 }

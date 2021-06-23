@@ -1,9 +1,11 @@
 package com.tjmedicine.emergency.utils;
 
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.tjmedicine.emergency.ui.uart.SettingActivity;
 
 import java.lang.reflect.Type;
 import java.util.List;
@@ -63,45 +65,86 @@ public class GsonUtils {
     public static String returnFormatText2(String data) {
         String TAG = "TAG-RETURN";
         String str = "";
-        if (data.startsWith("<") && data.endsWith(">")) {
+        if (TextUtils.isEmpty(data))
+            return null;
+        if (data.contains("Blow")) {
+            String splitter = "<";
+            String splitter1 = ">";
+            String regex = "^" + splitter + "*|" + splitter1 + "*$";
+            str = data.replaceAll(regex, "");
+            return str;
+        }
+        if (data.startsWith("<") && data.endsWith(">") && data.contains("|")) {
             String splitter = "<";
             String splitter1 = ">";
             String regex = "^" + splitter + "*|" + splitter1 + "*$";
 
             str = data.replaceAll(regex, "");
-            if (str.startsWith("PD=")) {
-                String[] split = str.split("=");
-                if (split.length > 1) {
-                    //0,0,0,0,0,0|CD
-                    if (split[1].contains("|")) {
-                        String[] split1 = split[1].split("\\|");
-                        Log.e(TAG, "returnFormatText2: PD=" + split1[0]);
-                        Log.e(TAG, "returnFormatText2: ABCD=" + split1[1]);
+            // String str = "PD=3,3,3,3,3,3|DF";
+//            String str = "Blow";
+
+            String[] split2 = str.split("\\|");
+            String s = split2[0];
+            String d = split2[1];
+            if (getChecksum(s).toUpperCase().equals(d)) {
+                if (s.startsWith("PD=")) {
+                    String[] split = s.split("=");
+                    if (split.length > 1) {
+                        //PD=0,0,0,0,0,0
+                        str = split[1];
+                        System.out.println("returnFormatText2: split2=  dstr==" + str);
                     }
                 }
-            }
-            if ("Battery=".startsWith(str)) {//电池电量 单位百分比
-//                Log.e(TAG, "returnFormatText2: Battery=", );
-            }
-            if ("FWVer=".startsWith(str)) {//软件版本号
-//                Log.e(TAG, "returnFormatText2: FWVer=", );
-            }
-            if ("HWVer".startsWith(str)) {//硬件版本号
-//                Log.e(TAG, "returnFormatText2: HWVer=", );
-            }
+                if (s.startsWith("Battery=")) {//电池电量 单位百分比
+//                    String[] split = s.split("=");
+//                    str = split[1];
+                    str = s;
+                    Log.e(TAG, "returnFormatText2: Battery=" + str);
+                }
+                if (s.startsWith("FWVer=")) {//软件版本号
+//                    String[] split = s.split("=");
+//                    str = split[1];
+                    str = s;
+                    Log.e(TAG, "returnFormatText2: FWVer=" + str);
+                }
+                if (s.startsWith("HWVer=")) {//硬件版本号
+//                    String[] split = s.split("=");
+//                    str = split[1];
+                    str = s;
+                    Log.e(TAG, "returnFormatText2: HWVer=" + str);
+                }
 
-            if ("Blow".startsWith(str)) {
-//                Log.e(TAG, "returnFormatText2: Blow=", );
+                if (s.startsWith("Blow")) {
+                    str = s;
+                    Log.e(TAG, "returnFormatText2: Blow=" + str);
+                }
+                if (s.startsWith("Errno=")) {
+                    Log.e(TAG, "returnFormatText2: Errno=" + str);
+                }
+                if (s.startsWith("OK=")) {
+                    Log.e(TAG, "returnFormatText2: OK=" + str);
+                }
+                return str;
+            } else {
+                str = "";
             }
-            if ("Errno=".startsWith(str)) {
-//                Log.e(TAG, "returnFormatText2: Errno=", );
-            }
-            if ("OK=".startsWith(str)) {
-//                Log.e(TAG, "returnFormatText2: OK=", );
-            }
-            return null;
         }
-        return null;
+        return str;
+    }
+
+
+    public static String getChecksum(String str) {
+        int nChecksum = 0;
+        for (int i = 0; i < str.length(); i++) {
+            nChecksum += str.charAt(i);
+        }
+        nChecksum = nChecksum & 0xFF;
+        String strChecksum = Integer.toHexString(nChecksum);
+        if (nChecksum < 16)
+            strChecksum = "0" + Integer.toHexString(nChecksum);
+
+        Log.e("校验--", "getChecksum=" + str);
+        return strChecksum;
     }
 
 
@@ -129,6 +172,5 @@ public class GsonUtils {
             return "--按压深度：" + split[1] + "mm";
         }
         return "";
-
     }
 }

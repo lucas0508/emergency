@@ -48,6 +48,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -91,6 +92,7 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
     private String modes;
     UARTControlFragment uartControlFragment;
     UARTControlScoreFragment uartControlScoreFragment;
+    UARTControlExamFragment uartControlExamFragment;
      ScannerFragment dialog;
 
     public interface ConfigurationListener {
@@ -141,7 +143,11 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
     @Override
     public void onConnected(final Bundle bundle) {
         // Ensure the Wearable API was connected
+
+
     }
+
+
 
     /**
      * Method called then Google API client connection was suspended.
@@ -164,13 +170,16 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
     protected void initView() {
         modes = getIntent().getStringExtra("mode");
         container = findViewById(R.id.container);
+
+
 //        TextView title = findViewById(R.id.tv_title);
 //        title.setText("模拟人");
-
+        // In onInitialize method a final class may register local broadcast receivers that will listen for events from the service
 
         if (isBLEEnabled()) {
             // isBLEEnabled()
             if (service == null) {
+
 //                setDefaultUI();
                 //x搜索所有的可连接蓝牙，用户自行连接
                 // showDeviceScanningDialog(getFilterUUID());
@@ -184,7 +193,7 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
                 showDeviceScanningDialog(UART_SERVICE_UUID);
             } else {
                 if (serviceBinder != null) {
-                    serviceBinder.send("<M>Stop</M>");
+                    serviceBinder.send("<TestStop>");
                 }
                 service.disconnect();
             }
@@ -209,8 +218,18 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
                 fragmentTransaction.show(uartControlScoreFragment);
             }
 
+        } else if (modes.equals("3")) {
+            if (uartControlFragment == null) {
+                uartControlScoreFragment = new UARTControlScoreFragment();
+                fragmentTransaction.add(R.id.content, uartControlScoreFragment);
+            } else {
+                fragmentTransaction.show(uartControlScoreFragment);
+            }
+
         }
         fragmentTransaction.commit();
+
+
     }
 
 
@@ -257,6 +276,7 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
 //        }
 //        dialog.onServiceStarted();
         //  ScannerFragment.onServiceStarted()
+
     }
 
     @Override
@@ -296,7 +316,6 @@ public class UARTActivity extends BleProfileServiceReadyActivity<UARTService.UAR
             slider.closePane();
             return;
         }
-
         super.onBackPressed();
     }
 
