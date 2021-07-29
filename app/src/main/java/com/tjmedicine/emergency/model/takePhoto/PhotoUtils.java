@@ -19,6 +19,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
+import com.orhanobut.logger.Logger;
 import com.yalantis.ucrop.UCrop;
 import com.yalantis.ucrop.UCropActivity;
 
@@ -80,15 +81,21 @@ public class PhotoUtils {
             String name = String.format("image-%d.jpg", System.currentTimeMillis());
             String path = Environment.getExternalStorageDirectory().getPath();
             File file = new File(path, name);
-            mCameraUri = Uri.fromFile(file);
             mCameraPhotoPath = file.toString();
+            mCameraUri = Uri.fromFile(file);
             //通过FileProvider创建一个content类型的Uri
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 imageUri = FileProvider.getUriForFile(context, "com.tjmedicine.emergency", file);
+                Logger.d("hahah：111");
             } else {
+                Logger.d("hahha：222");
                 imageUri = mCameraUri;
             }
+
+            Logger.d("mCameraUri："+mCameraUri);
+            Logger.d("imageUri："+imageUri);
             takePicture(context, imageUri, CODE_CAMERA_REQUEST);
+
         } else {
             Toast.makeText(context, "设备没有SD卡！", Toast.LENGTH_SHORT).show();
         }
@@ -186,6 +193,7 @@ public class PhotoUtils {
         String name = String.format("imagecrop-%d", System.currentTimeMillis()) + ".jpg";
 //        File fileUri = new File(Environment.getExternalStorageDirectory().getPath(), name);
         File fileUri = new File(context.getCacheDir(), name);
+
         Uri mDestinationUri = Uri.fromFile(fileUri);
         UCrop uCrop = UCrop.of(sourceUri, mDestinationUri);
         uCrop.withAspectRatio(config.aspectRatioX, config.aspectRatioY);
@@ -203,7 +211,7 @@ public class PhotoUtils {
         options.setToolbarColor(config.toolbarColor);
         options.setToolbarWidgetColor(config.toolbarWidgetColor);
         options.setStatusBarColor(config.statusBarColor);
-
+        Logger.d("执行777");
         uCrop.withOptions(options);
 
         uCrop.start(context);
@@ -222,6 +230,7 @@ public class PhotoUtils {
 
         if (resultCode == Activity.RESULT_OK) {
             if (requestCode == CODE_GALLERY_REQUEST) {//第一次，选择图片后返回
+                Logger.d("执行44444");
                 final Uri selectedUri = data.getData();
                 if (selectedUri != null) {
                     if (sIsCrop) startCropActivity(context, data.getData());
@@ -230,13 +239,18 @@ public class PhotoUtils {
                     Toast.makeText(context, "Cannot retrieve selected image", Toast.LENGTH_SHORT).show();
                 }
             } else if (requestCode == UCrop.REQUEST_CROP) {//第二次返回，图片已经剪切好
-
+                Logger.d("执行55555");
                 Uri finalUri = UCrop.getOutput(data);
                 cropHandler.handleCropResult(finalUri, config.tag);
 
             } else if (requestCode == CODE_CAMERA_REQUEST) {//第一次，拍照后返回，因为设置了MediaStore.EXTRA_OUTPUT，所以data为null，数据直接就在uri中
-                if (sIsCrop) startCropActivity(context, imageUri);
-                else cropHandler.handleCropResult(mCameraUri, config.tag);
+                Logger.d("执行6666");
+                if (sIsCrop) {
+                    startCropActivity(context, imageUri);
+                }
+                else{
+                    cropHandler.handleCropResult(mCameraUri, config.tag);
+                }
             }
         }
         if (resultCode == UCrop.RESULT_ERROR) {

@@ -6,6 +6,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.orhanobut.logger.Logger;
 import com.tjmedicine.emergency.R;
 import com.tjmedicine.emergency.common.base.BaseActivity;
 import com.tjmedicine.emergency.common.base.OnMultiClickListener;
@@ -69,7 +70,8 @@ public class EmergencyAddContactActivity extends BaseActivity implements IContac
             mApp.shortToast("请输入与他的关系!");
             return;
         }
-        if (ValidateUtils.validatePhone((mRelationPhone.getText().toString().trim()))) {
+        Logger.e(mRelationPhone.getText().toString().trim());
+        if (!ValidateUtils.validatePhone((mRelationPhone.getText().toString().trim()))) {
             mApp.shortToast("请输入您的手机号!");
             return;
         }

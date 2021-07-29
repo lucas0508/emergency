@@ -270,6 +270,16 @@ public class HealthAddFileActivity extends BaseActivity implements IHealthView {
     }
 
     @Override
+    public void delHealthRecordsSuccess() {
+
+    }
+
+    @Override
+    public void delHealthRecordsFail(String info) {
+
+    }
+
+    @Override
     public void findHealthRecordsListSuccess(List<HealthFileBeen> contactBean) {
 
     }

@@ -199,6 +199,7 @@ public class UARTControlExamFragment extends Fragment implements UARTActivity.Co
                         serverDataList = new ArrayList<>();
                         listPD1 = new ArrayList<>();
                         g = 0;
+                        initData();
                         startTimer();
                     }
                     liscount = new ArrayList<>();

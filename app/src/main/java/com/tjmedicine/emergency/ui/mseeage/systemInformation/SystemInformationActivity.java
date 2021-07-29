@@ -37,7 +37,7 @@ public class SystemInformationActivity extends BaseActivity {
     protected void initView() {
         mTitle.setText("系统消息");
         initRecyclerView();
-        mApp.getLoadingDialog().show();
+//        mApp.getLoadingDialog().show();
     }
 
     private void initRecyclerView() {

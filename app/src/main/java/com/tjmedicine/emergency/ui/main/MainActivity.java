@@ -13,8 +13,6 @@ import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
 
-import com.google.gson.Gson;
-import com.mob.mobapm.MobAPM;
 import com.mob.pushsdk.MobPush;
 import com.mob.pushsdk.MobPushCallback;
 import com.mob.pushsdk.MobPushUtils;
@@ -22,7 +20,6 @@ import com.orhanobut.logger.Logger;
 import com.tjmedicine.emergency.R;
 import com.tjmedicine.emergency.common.base.ActivityManager;
 import com.tjmedicine.emergency.common.base.BaseActivity;
-import com.tjmedicine.emergency.common.cache.db.SQLiteHelper;
 import com.tjmedicine.emergency.common.dialog.DialogManage;
 import com.tjmedicine.emergency.common.global.GlobalConstants;
 import com.tjmedicine.emergency.common.net.HttpProvider;

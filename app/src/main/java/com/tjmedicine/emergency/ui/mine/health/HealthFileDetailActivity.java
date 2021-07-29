@@ -255,6 +255,16 @@ public class HealthFileDetailActivity extends BaseActivity implements IHealthVie
     }
 
     @Override
+    public void delHealthRecordsSuccess() {
+
+    }
+
+    @Override
+    public void delHealthRecordsFail(String info) {
+
+    }
+
+    @Override
     public void findHealthRecordsListSuccess(List<HealthFileBeen> contactBean) {
 
     }

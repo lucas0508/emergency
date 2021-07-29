@@ -9,6 +9,7 @@ public interface IHealthModel extends IBaseModel{
 
     void addHealthRecords(Map<String, Object> map, final OnCallbackListener listener);
 
+    void delHealthRecords(String id,final OnCallbackListener listener);
 
     void findHealthRecordsList(OnCallbackDataListener listener);
 

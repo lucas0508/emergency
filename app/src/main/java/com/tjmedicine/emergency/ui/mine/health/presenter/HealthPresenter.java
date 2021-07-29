@@ -42,6 +42,21 @@ public class HealthPresenter extends BasePresenter {
         });
     }
 
+
+    public void delHealth(String id){
+        iHealthModel.delHealthRecords(id, new IBaseModel.OnCallbackListener() {
+            @Override
+            public void callback(ResponseEntity res) {
+                if (HttpProvider.isSuccessful(res.getCode())) {
+                    iHealthView.delHealthRecordsSuccess();
+                } else {
+                    iHealthView.delHealthRecordsFail(res.getMsg());
+                }
+            }
+        });
+    }
+
+
     public void findHealthRecordsList() {
         iHealthModel.findHealthRecordsList(new IBaseModel.OnCallbackDataListener() {
             @Override

@@ -30,7 +30,7 @@ import com.tjmedicine.emergency.utils.SoundPlayUtils;
 public class TaskSucDialog extends Dialog {
 
     private TextView taskRestart, tv_report_pd, tv_report_pd_regular, tv_pd_30_2,
-            tv_pd_time, tv_test_result,tv_pd_rebound;
+            tv_pd_time, tv_test_result, tv_pd_rebound, tv_report_pd_regular_hg, tv_report_pd_regular_z;
     private ImageView taskClose;
     private AlertDialog mDialog;
     /*缩放动画*/
@@ -62,7 +62,8 @@ public class TaskSucDialog extends Dialog {
         tv_pd_30_2 = (TextView) view.findViewById(R.id.tv_pd_30_2);
         tv_pd_time = (TextView) view.findViewById(R.id.tv_pd_time);
         tv_pd_rebound = view.findViewById(R.id.tv_pd_rebound);
-
+        tv_report_pd_regular_hg = view.findViewById(R.id.tv_report_pd_regular_hg);
+        tv_report_pd_regular_z = view.findViewById(R.id.tv_report_pd_regular_z);
         tv_test_result = (TextView) view.findViewById(R.id.tv_test_result);
 
 
@@ -74,19 +75,23 @@ public class TaskSucDialog extends Dialog {
     }
 
 
-    public void initData(String report_pd, String report_pd_regular, String pd_30_2, String pd_time,String pd_rebound, String result) {
+    public void initData(String report_pd, String report_pd_regular, String pd_30_2, String pd_time, String pd_rebound, String result) {
         //按压频率---：5/分
         //按压深度合格率---：0%
         //30:2---：不合格
         //两次按压时间差：不合格
         //pd_rebound 回弹
-        if (Double.parseDouble(report_pd) > 110 && Double.parseDouble(report_pd) < 120) {
+        if (Double.parseDouble(report_pd) > 99 && Double.parseDouble(report_pd) < 121) {
             tv_report_pd.setTextColor(Color.GREEN);
         } else {
             tv_report_pd.setTextColor(Color.RED);
         }
+        String[] split = report_pd_regular.split("\\|");
 
-        if (Double.parseDouble(report_pd_regular) > 80) {
+        tv_report_pd_regular_hg.setText("(1).按压合格次数:" + split[0]);
+        tv_report_pd_regular_z.setText("(2).按压总次数:" + split[1]);
+
+        if (Double.parseDouble(split[2]) > 80) {
             tv_report_pd_regular.setTextColor(Color.GREEN);
         } else {
             tv_report_pd_regular.setTextColor(Color.RED);
@@ -109,13 +114,13 @@ public class TaskSucDialog extends Dialog {
             tv_pd_time.setTextColor(Color.RED);
         }
         //按压频率为
-        tv_report_pd.setText(report_pd+"次/分");
+        tv_report_pd.setText(report_pd + "次/分");
         //按压深度合格率为
-        tv_report_pd_regular.setText(report_pd_regular+"%");
+        tv_report_pd_regular.setText(split[2] + "%");
         //人工呼吸的比例
         tv_pd_30_2.setText(pd_30_2);
         //胸廓完全回弹合格率为
-        tv_pd_rebound.setText(pd_rebound+"%");
+        tv_pd_rebound.setText(pd_rebound + "%");
         //时间差
         tv_pd_time.setText(pd_time);
 
@@ -224,3 +229,4 @@ public class TaskSucDialog extends Dialog {
         mScaleSpring.removeListener(mSpringListener);
     }
 }
+

@@ -139,6 +139,8 @@ public class HomePageFragment extends BaseFragment implements AMap.OnMapLoadedLi
     ImageView mLocation;
     @BindView(R.id.ic_launcher)
     ImageView ic_launcher;
+    @BindView(R.id.iv_equipment)
+    ImageView mEquipment;
     private AMap aMap;
     public View mView;
 
@@ -171,9 +173,7 @@ public class HomePageFragment extends BaseFragment implements AMap.OnMapLoadedLi
         }
 
 
-
     }
-
 
 
     @Nullable
@@ -235,24 +235,29 @@ public class HomePageFragment extends BaseFragment implements AMap.OnMapLoadedLi
         mDummy.setOnClickListener(new OnMultiClickListener() {
             @Override
             public void onMultiClick(View v) {
-                mApp.getOptionDialog().show("请选择模式", new String[]{"1", "2"}, position -> {
-                    /**
-                     * type  1: 练习
-                     *       2：测试
-                     *       3：考试
-                     */
-                    Bundle bundle = new Bundle();
-                    if (position == 0) {
-                        bundle.putString("mode", "1");
-                    } else if (position == 1) {
-                        bundle.putString("mode", "2");
-                    }
+                if (mApp.isLogin()) {
+                    mApp.getOptionDialog().show("请选择模式", new String[]{"1", "2"}, position -> {
+                        /**
+                         * type  1: 练习
+                         *       2：测试
+                         *       3：考试
+                         */
+                        Bundle bundle = new Bundle();
+                        if (position == 0) {
+                            bundle.putString("mode", "1");
+                        } else if (position == 1) {
+                            bundle.putString("mode", "2");
+                        }
 //                    else if (position == 2) {
 //                        //添加实名认证
 //                        bundle.putString("mode", "3");
 //                    }
-                    startActivity(UARTActivity.class, bundle);
-                });
+                        startActivity(UARTActivity.class, bundle);
+                    });
+                } else {
+                    startActivity(LoginActivity.class);
+                }
+
                 /*if (mApp.isLogin()) {
                     mApp.getOptionDialog().show("请选择模式", new String[]{"1", "2","3"}, position -> {
                         *//**
@@ -307,11 +312,18 @@ public class HomePageFragment extends BaseFragment implements AMap.OnMapLoadedLi
 //                userOverlay(Constants.MAPROLE_AED);
                 AnimUtil.starAnim2(mAids);
                 mapDataPresenter.queryMapData(Constants.MAPROLE_AED);
-
-
             }
         });
+        mEquipment.setOnClickListener(new OnMultiClickListener() {
+            @Override
+            public void onMultiClick(View v) {
 
+
+                AnimUtil.starAnim2(mAids);
+                mApp.shortToast("攻城狮正在开发中...");
+               // startActivity(SystemInformationActivity.class);
+            }
+        });
         iv_common_right.setOnClickListener(new OnMultiClickListener() {
 
             @Override
@@ -324,7 +336,6 @@ public class HomePageFragment extends BaseFragment implements AMap.OnMapLoadedLi
 
     @Override
     protected void initView() {
-
     }
 
     @Override

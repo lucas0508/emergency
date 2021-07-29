@@ -4,8 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@color/white">
+    android:background="@color/white"
+    android:orientation="vertical">
 
     <include
         android:id="@+id/include"
@@ -16,11 +16,11 @@
         android:layout_height="match_parent">
 
         <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:layout_marginTop="20dp"
             android:gravity="center_horizontal"
-            android:orientation="vertical"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:orientation="vertical">
 
 
             <ImageView
@@ -28,17 +28,15 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:contentDescription="TODO"
-                android:src="@mipmap/ic_launcher"
-               />
+                android:src="@mipmap/ic_launcher" />
 
             <TextView
                 android:id="@+id/textView"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_marginStart="24dp"
                 android:layout_marginTop="20dp"
                 android:layout_marginEnd="24dp"
-                android:textSize="16sp"
                 android:text="
         \u3000\u3000\n“121急救”是一款专业、高效、精准的集院外呼救、自救、互救、急救资源查询、定位、急救器材展示销售、非紧急医疗转运、健康知识、急救知识科普、急救培训等为一体的智能数字化急救管理APP。\u3000\u3000\n“121急救”专注做“120+1”，深耕急救培训及院外非紧急医疗救护领域。旨在辅助各地急救中心或机构完善院前急救体系建设，充分普及急救与健康知识、助力实现医疗急救资源高效利用、缩短急救总时间、提升患者救治率。
         \n重要功能概述：
@@ -49,19 +47,29 @@
         \n5、急救商城：急救物品或器械的展示、销售平台。
         \n6、非紧急医疗转运：老人、孕妇等行动不便群体助行、非急危重症患者长、短途监护转运、大型活动保障等。"
                 android:textColor="#343434"
-               />
+                android:textSize="16sp" />
 
 
             <TextView
-                android:visibility="gone"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="24dp"
                 android:layout_marginTop="30dp"
+                android:layout_marginBottom="24dp"
+                android:textColor="#ff9a9a9a"
+                android:textSize="16sp"
+                android:visibility="visible" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="30dp"
+                android:layout_marginBottom="24dp"
                 android:text="反馈邮箱：2355533450@qq.com\n客服热线：400-0555-065"
                 android:textColor="#ff9a9a9a"
-                android:layout_marginBottom="24dp"
-                android:textSize="16sp" />
+                android:textSize="16sp"
+                android:visibility="gone" />
 
         </LinearLayout>
 

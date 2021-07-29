@@ -18,6 +18,7 @@ import com.lxj.xpopup.XPopup;
 import com.lxj.xpopupext.listener.CityPickerListener;
 import com.lxj.xpopupext.popup.CityPickerPopup;
 import com.orhanobut.logger.Logger;
+import com.tjmedicine.emergency.EmergencyApplication;
 import com.tjmedicine.emergency.R;
 import com.tjmedicine.emergency.common.base.BaseActivity;
 import com.tjmedicine.emergency.common.base.OnMultiClickListener;
@@ -28,7 +29,11 @@ import com.tjmedicine.emergency.model.takePhoto.PhotoUtils;
 import com.tjmedicine.emergency.model.widget.SelectPicDialog;
 import com.tjmedicine.emergency.ui.mine.auth.presenter.AuthPresenter;
 
+import java.io.File;
+
 import butterknife.BindView;
+import top.zibin.luban.Luban;
+import top.zibin.luban.OnCompressListener;
 
 @SuppressLint("NonConstantResourceId")
 public class MineAuthActivity extends BaseActivity implements IAuthView {
@@ -230,8 +235,7 @@ public class MineAuthActivity extends BaseActivity implements IAuthView {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-/*        PhotoUtils.onActivityResult(requestCode, resultCode, data, getContext(), new PhotoUtils.CropHandler() {
-
+        PhotoUtils.onActivityResult(requestCode, resultCode, data, getContext(), new PhotoUtils.CropHandler() {
             @Override
             public void handleCropResult(final Uri uri, int tag) {
                 Luban.with(EmergencyApplication.getContext())
@@ -245,14 +249,31 @@ public class MineAuthActivity extends BaseActivity implements IAuthView {
                             @Override
                             public void onSuccess(File file) {
                                 try {
-                                    if (selectIndex == 0) {
-                                        imgIdCardFront = file.getAbsolutePath();
-                                        Glide.with(ApplyVolunteerActivity.this).applyDefaultRequestOptions(new RequestOptions().centerCrop()).load(uri.getPath()).into(iv_id_card_front);
-                                    } else if (selectIndex == 1) {
-
-                                        imgIdCardBack = file.getAbsolutePath();
-                                        Glide.with(ApplyVolunteerActivity.this).applyDefaultRequestOptions(new RequestOptions().centerCrop()).load(uri.getPath()).into(iv_id_card_back);
-                                    }
+                                    Logger.d("图片返回路径uri----"+file.getPath());
+                                    Logger.d("图片返回路径aaa----"+file.getAbsolutePath());
+                                    QiNiuUtils.getInstance().upload(uri.getPath(), new QiNiuUtils.UploadResult() {
+                                        @Override
+                                        public void success(String path) {
+                                            Logger.d("图片返回路径+" + path);
+                                            mApp.getLoadingDialog().hide();
+                                            try {
+                                                if (selectIndex == 1) {
+                                                    imgIdCardFront = path;
+                                                    Glide.with(MineAuthActivity.this).applyDefaultRequestOptions(new RequestOptions().centerCrop()).load(uri.getPath()).into(iv_id_card_front);
+                                                } else if (selectIndex == 2) {
+                                                    imgIdCardBack = path;
+                                                    Glide.with(MineAuthActivity.this).applyDefaultRequestOptions(new RequestOptions().centerCrop()).load(uri.getPath()).into(iv_id_card_back);
+                                                }
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+                                        @Override
+                                        public void fail() {
+                                            mApp.shortToast("图片错误，请重新上传!");
+                                            mApp.getLoadingDialog().hide();
+                                        }
+                                    });
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }
@@ -269,13 +290,15 @@ public class MineAuthActivity extends BaseActivity implements IAuthView {
             public void handleCropError(Intent data) {
                 mApp.shortToast("图片错误");
             }
-        });*/
-        PhotoUtils.onActivityResult(requestCode, resultCode, data, getContext(), new PhotoUtils.CropHandler() {
+        });
+      /*  PhotoUtils.onActivityResult(requestCode, resultCode, data, getContext(), new PhotoUtils.CropHandler() {
             @Override
             public void handleCropResult(final Uri uri, int tag) {
                 mApp.getLoadingDialog().show();
-                final String s = QiNiuUtils.getInstance().compressImageUpload(uri.getPath());
-                QiNiuUtils.getInstance().upload(s, new QiNiuUtils.UploadResult() {
+                Logger.d("图片返回路径+ 111111111111" );
+                Logger.d("图片返回路径uri"+uri.getPath());
+               // final String s = QiNiuUtils.getInstance().compressImageUpload(uri.getPath());
+                QiNiuUtils.getInstance().upload(uri.getPath(), new QiNiuUtils.UploadResult() {
                     @Override
                     public void success(String path) {
                         Logger.d("图片返回路径+" + path);
@@ -305,6 +328,6 @@ public class MineAuthActivity extends BaseActivity implements IAuthView {
             public void handleCropError(Intent data) {
                 mApp.shortToast("图片错误");
             }
-        });
+        });*/
     }
 }

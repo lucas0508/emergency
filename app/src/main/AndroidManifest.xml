@@ -43,7 +43,7 @@
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
     <!-- 必选-->
     <uses-permission android:name="android.permission.RECORD_AUDIO" /> <!-- 允许程序录制音频 -->
-    <uses-permission android:name="android.permission.GET_TASKS"/>
+    <uses-permission android:name="android.permission.GET_TASKS" />
 
     <!-- 可选-->
     <uses-permission android:name="android.permission.READ_LOGS" /> <!-- 获取logcat日志 -->
@@ -60,9 +60,9 @@
         android:networkSecurityConfig="@xml/network_security_config"
         android:requestLegacyExternalStorage="true"
         android:supportsRtl="true"
-        tools:replace="android:icon,android:theme"
         android:theme="@style/Theme.Emergency"
-        android:usesCleartextTraffic="true">
+        android:usesCleartextTraffic="true"
+        tools:replace="android:icon,android:theme">
 
         <!--//    设计图纸 大小 -->
         <meta-data
@@ -80,7 +80,7 @@
         <meta-data
             android:name="com.mob.mobpush.debugLevel"
             android:value="4" />
-        
+
         <meta-data
             android:name="PGYER_API_KEY"
             android:value="d77b2c007f66d27e67c0aa87629db9e4"></meta-data>
@@ -178,6 +178,7 @@
         <activity android:name=".ui.me.view.PersonalActivity" />
         <activity android:name=".ui.mine.health.HealthFileDetailActivity" />
         <activity android:name=".ui.mseeage.systemInformation.SystemInformationActivity" />
+        <activity android:name=".ui.equipment.EquipmentActivity" />
         <activity
             android:name=".ui.teach.view.TeachingDetailActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|uiMode"

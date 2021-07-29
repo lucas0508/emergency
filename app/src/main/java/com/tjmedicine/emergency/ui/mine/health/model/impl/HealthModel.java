@@ -29,6 +29,16 @@ public class HealthModel extends BaseModel implements IHealthModel {
     }
 
     @Override
+    public void delHealthRecords(String id, OnCallbackListener listener) {
+        HttpProvider.doGet(GlobalConstants.APP_USER_EDITHEALTH_RECORDS+"?id="+id, new HttpProvider.ResponseCallback() {
+            @Override
+            public void callback(String responseText) {
+                executeCallback(responseText, null, listener);
+            }
+        });
+    }
+
+    @Override
     public void findHealthRecordsList(OnCallbackDataListener listener) {
         HttpProvider.doGet(GlobalConstants.APP_USER_FINDHEALTH_RECORD_LIST, new HttpProvider.ResponseCallback() {
             @Override

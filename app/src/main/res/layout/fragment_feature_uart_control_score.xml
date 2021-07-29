@@ -190,6 +190,7 @@
                 app:bga_pb_unReachedHeight="3dp" />
 
             <TextView
+                android:id="@+id/tv_bga_blow"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"

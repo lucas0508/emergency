@@ -180,8 +180,8 @@ public class TeachingFragment extends BaseFragment implements IBannerView, ITeac
             bannerListType.add(url.getType());
         }
 
-        bannerList.set(0,"https://bkimg.cdn.bcebos.com/pic/5fdf8db1cb134954fccc766a564e9258d0094aea?x-bce-process=image/watermark,image_d2F0ZXIvYmFpa2U4MA==,g_7,xp_5,yp_5/format,f_auto");
-        bannerList.set(1,"https://img0.baidu.com/it/u=2958138263,3784611146&fm=26&fmt=auto&gp=0.jpg");
+//        bannerList.set(0,"https://bkimg.cdn.bcebos.com/pic/5fdf8db1cb134954fccc766a564e9258d0094aea?x-bce-process=image/watermark,image_d2F0ZXIvYmFpa2U4MA==,g_7,xp_5,yp_5/format,f_auto");
+//        bannerList.set(1,"https://img0.baidu.com/it/u=2958138263,3784611146&fm=26&fmt=auto&gp=0.jpg");
         //bannerList.set(2,"https://img0.baidu.com/it/u=3782916108,2692951759&fm=26&fmt=auto&gp=0.jpg");
         bgaBanner.setData(bannerList, null);
         bgaBanner.setDelegate(new BGABanner.Delegate() {
@@ -207,10 +207,10 @@ public class TeachingFragment extends BaseFragment implements IBannerView, ITeac
 
     @Override
     public void findTeachingSuccess(List<TeachingBean.ListBean> listBeans) {
-        listBeans.get(0).setBaseUrl("https://i2cut.vzan.cc/image/liveImage/jpeg/2021/1/20/0431228e08becc725447dc86e6f9513561af8b.jpeg");
-        listBeans.get(1).setBaseUrl("https://mmbiz.qpic.cn/mmbiz_jpg/DiaezH07koIHicbAmJdL6AMsgIpDwQUJYEicckUe6vibOJGLUTPIKnbh0NmW7qxxj8SZkwpNib9E9peA2BKHSNoL4DQ/640?wx_fmt=jpeg");
-        listBeans.get(2).setBaseUrl("https://135editor.cdn.bcebos.com/uploadword/1761401/202011/5fb79bc6-ecac-458a-9bc0-1124ac10006b.jpg");
-        listBeans.get(3).setBaseUrl("https://mmbiz.qpic.cn/mmbiz_jpg/DiaezH07koIGlmc97vONjvaTHzibfSNIkQHzvRIFRrzocjzyib6CmtxibQ0sbONP5afMYvTnRtE6oFXgPvITuZH5RQ/640?wx_fmt=jpeg");
+//        listBeans.get(0).setBaseUrl("https://i2cut.vzan.cc/image/liveImage/jpeg/2021/1/20/0431228e08becc725447dc86e6f9513561af8b.jpeg");
+//        listBeans.get(1).setBaseUrl("https://mmbiz.qpic.cn/mmbiz_jpg/DiaezH07koIHicbAmJdL6AMsgIpDwQUJYEicckUe6vibOJGLUTPIKnbh0NmW7qxxj8SZkwpNib9E9peA2BKHSNoL4DQ/640?wx_fmt=jpeg");
+//        listBeans.get(2).setBaseUrl("https://135editor.cdn.bcebos.com/uploadword/1761401/202011/5fb79bc6-ecac-458a-9bc0-1124ac10006b.jpg");
+//        listBeans.get(3).setBaseUrl("https://mmbiz.qpic.cn/mmbiz_jpg/DiaezH07koIGlmc97vONjvaTHzibfSNIkQHzvRIFRrzocjzyib6CmtxibQ0sbONP5afMYvTnRtE6oFXgPvITuZH5RQ/640?wx_fmt=jpeg");
         mAdapter.addAll(listBeans);
     }
 

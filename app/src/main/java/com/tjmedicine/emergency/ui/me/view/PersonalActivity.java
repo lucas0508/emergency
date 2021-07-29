@@ -12,7 +12,6 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.orhanobut.logger.Logger;
-import com.tjmedicine.emergency.EmergencyApplication;
 import com.tjmedicine.emergency.R;
 import com.tjmedicine.emergency.common.base.BaseActivity;
 import com.tjmedicine.emergency.common.base.OnMultiClickListener;
@@ -78,7 +77,7 @@ public class PersonalActivity extends BaseActivity implements IMineFragmentView,
     @Override
     protected void initView() {
         mTitle.setText("个人信息");
-        tv_common_right.setText("修改");
+        tv_common_right.setText("保存");
         tv_common_right.setOnClickListener(new OnMultiClickListener() {
             @Override
             public void onMultiClick(View v) {
@@ -233,11 +232,12 @@ public class PersonalActivity extends BaseActivity implements IMineFragmentView,
             @Override
             public void handleCropResult(final Uri uri, int tag) {
                 mApp.getLoadingDialog().show();
+                Logger.d("执行uri.getPath()"+uri.getPath());
                 final String s = QiNiuUtils.getInstance().compressImageUpload(uri.getPath());
                 QiNiuUtils.getInstance().upload(s, new QiNiuUtils.UploadResult() {
                     @Override
                     public void success(String path) {
-                        imageUrlPath = uri.getPath();
+                        imageUrlPath = path;
                         Glide.with(PersonalActivity.this).load(uri.getPath())
                                 .apply(new RequestOptions()
                                         .placeholder(R.mipmap.head))

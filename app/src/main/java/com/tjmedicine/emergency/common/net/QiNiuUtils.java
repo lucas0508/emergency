@@ -5,7 +5,6 @@ import android.graphics.BitmapFactory;
 import android.os.Environment;
 import android.util.Log;
 
-import com.facebook.stetho.common.LogUtil;
 import com.google.gson.reflect.TypeToken;
 import com.qiniu.android.http.ResponseInfo;
 import com.qiniu.android.storage.UpCompletionHandler;
@@ -77,7 +76,7 @@ public class QiNiuUtils {
      * 获取token
      */
     private void getToken() {
-        HttpProvider.doGet(GlobalConstants.BASE_SERVER_+"/mobile/file/uptoken", getTokenCallback);
+        HttpProvider.doGet(GlobalConstants.BASE_SERVER_URL+"/file/uptoken", getTokenCallback);
 //        HttpProvider.doGet("http://192.168.1.142:8096/app/qiniu/getQiniuToken", getTokenCallback);
     }
 
@@ -104,18 +103,17 @@ public class QiNiuUtils {
     private void uploadFinal(String token) {
         final String fileName = getFileName();
         File file = new File(mFilePath);
-        LogUtil.e("qiniu  file",file.length()+"");
         mUploadManager.put(file, fileName, token, new UpCompletionHandler() {
             @Override
             public void complete(String key, ResponseInfo info, JSONObject response) {
                 if (info.isOK()) {
                     if (mUploadResult != null)
-                        mUploadResult.success(GlobalConstants.BASE_QI_NIU_URL+ fileName);
+                        mUploadResult.success(GlobalConstants.BASE_QI_NIU_URL+"/"+ fileName);
                 } else {
                     uploadFail("文件上传失败，请稍后再试！");
                 }
 
-                Log.i("qiniu", key + ",\r\n " + info + ",\r\n " + info);
+                Log.i("qiniu", key + ",\r\n " + info);
             }
         }, null);
     }
@@ -126,7 +124,6 @@ public class QiNiuUtils {
     private void uploadFail(String info) {
         if (mUploadResult != null) mUploadResult.fail();
      //   Toast.makeText(MyApplication.getContext(), info, Toast.LENGTH_SHORT).show();
-        LogUtil.e("qiniu ----- file",info+"");
     }
 
     public interface UploadResult {
@@ -221,7 +218,6 @@ public class QiNiuUtils {
      * @return
      */
     private Bitmap compressImage(Bitmap image) {
-        LogUtil.e("image",image+"");
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         image.compress(Bitmap.CompressFormat.JPEG, 100, baos);
         int options = 100;

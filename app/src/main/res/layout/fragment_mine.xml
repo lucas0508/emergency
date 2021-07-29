@@ -124,11 +124,11 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_margin="10dp"
-                        android:layout_weight="10"
+                        android:layout_weight="1"
                         android:drawableTop="@mipmap/me_icon_volunteers"
                         android:drawablePadding="4dp"
                         android:gravity="center"
-                        android:text="实名认证"
+                        android:text="实名认证 "
                         android:textSize="14sp" />
 
                     <View
@@ -147,7 +147,7 @@
                         android:drawableTop="@mipmap/me_icon_volunteers"
                         android:drawablePadding="4dp"
                         android:gravity="center"
-                        android:text="申请成为志愿者"
+                        android:text="成为志愿者"
                         android:textSize="14sp" />
 
                     <View
@@ -166,7 +166,7 @@
                         android:drawableTop="@mipmap/me_icon_contact"
                         android:drawablePadding="4dp"
                         android:gravity="center"
-                        android:text="设置紧急联系人"
+                        android:text="紧急联系人"
                         android:textSize="14sp" />
 
                 </LinearLayout>
@@ -220,6 +220,7 @@
                 </LinearLayout>
 
                 <View
+                    android:visibility="gone"
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:layout_marginLeft="10dp"
@@ -297,7 +298,6 @@
                         android:layout_height="10dp"
                         android:layout_gravity="center_vertical"
                         android:layout_marginRight="10dp"
-                        android:background="#FFFFFF"
                         android:src="@mipmap/me_right" />
 
                 </LinearLayout>

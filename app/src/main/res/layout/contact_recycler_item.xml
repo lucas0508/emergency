@@ -41,11 +41,22 @@
                 android:layout_marginTop="8dp"
                 android:ellipsize="end"
                 android:maxLines="2"
-                android:text="这是内容介绍这是内容介绍这是内容介绍这这是内容介绍这是内容介绍这是内容介绍这是内容介绍是内容介绍这是内容介绍这是内容介绍这这是内容介绍这是内容介绍这是内容介绍这是内容介绍是内容介绍这是内容介绍"
+                android:text="这介绍是内容介绍这是内容介绍"
                 android:textColor="#ff626366"
                 android:textSize="14sp" />
+
+
         </LinearLayout>
 
+        <TextView
+            android:visibility="gone"
+            android:id="@+id/tv_del"
+            android:gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="删除"
+            android:textColor="#ff333333"
+            android:textSize="16sp" />
 
     </LinearLayout>
 

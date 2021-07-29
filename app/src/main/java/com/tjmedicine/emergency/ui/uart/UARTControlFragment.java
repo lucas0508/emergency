@@ -45,6 +45,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.ScaleAnimation;
 import android.widget.Button;
 import android.widget.Chronometer;
 import android.widget.ImageView;
@@ -103,7 +106,7 @@ public class UARTControlFragment extends Fragment implements UARTActivity.Config
     BatteryView batteryview;
     Button mStartRobot;
     Chronometer chronometer;
-    ImageView mCountdownView, iv_setting, iv_point;
+    ImageView mCountdownView, iv_setting, iv_point, mmr;
     long startTime;
     boolean incline = true;//是否点击开始模拟人
     List<String> liscount;
@@ -207,6 +210,7 @@ public class UARTControlFragment extends Fragment implements UARTActivity.Config
         mHistoricalData = view.findViewById(R.id.tv_historical_data);
         bga_pdcount_progress = view.findViewById(R.id.bga_pdcount_progress);
         bga_blow_progress = view.findViewById(R.id.bga_blow_progress);
+        mmr = view.findViewById(R.id.mmr);
         iv_setting.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -251,6 +255,9 @@ public class UARTControlFragment extends Fragment implements UARTActivity.Config
                             public void onClick() {
                                 customDjsFullScreenPopup.dismiss();
                                 //播放完成回调
+                                initData();//初始化数据
+//                                initChart();//数据设置
+
                                 //final String text = field.getText().toString();
                                 Log.e(TAG, "onMultiClick:111-- " + incline);
                                 if (null != uartInterface) {
@@ -259,7 +266,6 @@ public class UARTControlFragment extends Fragment implements UARTActivity.Config
 //                                    uartInterface.send("<NewVer=v0.1.0|F7>");
                                     starttime();
                                 }
-
                             }
                         });
                         new XPopup.Builder(requireActivity()).asCustom(customDjsFullScreenPopup).show();
@@ -268,7 +274,7 @@ public class UARTControlFragment extends Fragment implements UARTActivity.Config
                     }
                 } else {
                     ToastUtils.showTextToas(requireActivity(), "请连接模拟人后在点击开始练习哦~");
-                    starttime();
+                    //starttime();
                 }
             }
         });
@@ -289,14 +295,6 @@ public class UARTControlFragment extends Fragment implements UARTActivity.Config
             timer.cancel();
         }
         Log.e(TAG, " --max-------> " + new Gson().toJson(listPD));
-        /**
-         * 计算波峰--按压次数
-         *
-         * 0    1   2   3   4   5   6    7
-         * 12  12  13  14  15  58  24   22  12
-         *
-         *
-         */
         for (int i = 1; i < listPD.size() - 1; i++) {
             if (listPD.get(i) > listPD.get(i - 1) && listPD.get(i) >= listPD.get(i + 1)) {
                 if (listPD.get(i) > 30) {
@@ -326,6 +324,7 @@ public class UARTControlFragment extends Fragment implements UARTActivity.Config
     }
 
     private void starttime() {
+
         HttpProvider.doGet(GlobalConstants.APP_BURIED_POINT + Constants.B_BLE_START + "," + bleService.getDeviceAddress(), null);
         startTimer();
         liscount = new ArrayList<>();
@@ -398,7 +397,7 @@ public class UARTControlFragment extends Fragment implements UARTActivity.Config
         colour.add(Color.BLUE);
 
         dynamicLineChartManager1 = new DynamicLineChartManager(mChart1, names.get(0), colour.get(0));
-        dynamicLineChartManager1.setYAxis(130, 0, 10);
+        dynamicLineChartManager1.setYAxis(80, 0, 10);
         dynamicLineChartManager1.setHightLimitLine(60f, "", Color.GREEN);
         dynamicLineChartManager1.setHightLimitLine(50f, "", Color.GREEN);
     }
@@ -464,7 +463,6 @@ public class UARTControlFragment extends Fragment implements UARTActivity.Config
             Log.e(TAG, " --UARTControlFragment---onReceive:-------> " + data);
             String s = GsonUtils.returnFormatText2(data.trim());
             Log.e(TAG, "onReceive: handleMessage：---->" + s);
-
 //            Map<String, Object> stringObjectMap = new HashMap<>();
 //            stringObjectMap.put("id", System.currentTimeMillis());
 //            stringObjectMap.put("data", data);
@@ -528,6 +526,7 @@ public class UARTControlFragment extends Fragment implements UARTActivity.Config
                     //实时统计吹气次数
                     bga_blow_progress.setProgress(g);
                     tv_bga_blow.setText("人工呼吸" + g + "次");
+                    mmrAnim();
                 } else if (s.contains("FWVer") || s.contains("HWVer")) {
                     return;
                 } else {
@@ -595,6 +594,13 @@ public class UARTControlFragment extends Fragment implements UARTActivity.Config
     }
 
     /**
+     * 呼气  模拟人缩放动画
+     */
+    private void mmrAnim() {
+        mmr.startAnimation(AnimationUtils.loadAnimation(getActivity(), R.anim.mmr_scale));
+    }
+
+    /**
      * 每到31次的时候 检查是否呼气 没有呼气则语音提示
      * 每到32次的时候 检查是否呼气 没有呼气则语音提示
      *
@@ -623,9 +629,24 @@ public class UARTControlFragment extends Fragment implements UARTActivity.Config
         }
     }
 
+
     @Override
     public void onDestroy() {
         super.onDestroy();
+        if (null != mediaPlayer && mediaPlayer.isPlaying()) {
+            mediaPlayer.stop();
+        }
+        if (null!=animationDrawable){
+            animationDrawable.stop();
+        }
+        Log.e(TAG, "onMultiClick:2222-- " + incline);
+        mStartRobot.setText("开启模拟人");
+        uartInterface.send("<TestStop>");
+        chronometer.setFormat("计时结束：%s");
+        chronometer.stop();
+        if (timer != null) {
+            timer.cancel();
+        }
         if (myReceiver != null) {
             requireActivity().unregisterReceiver(myReceiver);
         }
@@ -634,7 +655,7 @@ public class UARTControlFragment extends Fragment implements UARTActivity.Config
             timer.cancel();
         if (uartInterface != null) {
             HttpProvider.doGet(GlobalConstants.APP_BURIED_POINT + Constants.B_BLE_END + "," + bleService.getDeviceAddress(), null);
-            uartInterface.send("<TestStop>");
+//            uartInterface.send("<TestStop>");
             uartInterface = null;
         }
         requireActivity().unbindService(serviceConnection);
@@ -647,43 +668,5 @@ public class UARTControlFragment extends Fragment implements UARTActivity.Config
         }
     }
 }
-
-// 选取时间和套餐---支付---线下去体验就OK
-
-
-// TODO: 2021-04-09  2021-04-09  新需求
-
-/*
- *
- * 增加默认零点校准   提示请勿触碰模拟人
- *
- * 练习模式：    1.滴滴的声音
- *              2.呼吸灯+动画
- *              3.不限制时间
- *              4.曲线图
- *              5.提示吹气提示
- *
- * 测试模式：    1.三十秒
- *              2.评分  优  良 差
- *              3.曲线图
- *              4.提示吹气提示
- *
- *
- * 暂时不做
- * 考试模式：    1.先实名认证
- *              2.阅读注意事项（）
- *              3.一天三次
- *              4.结束语通知：考试结束请等待后台审核通知！
- *
- *
- */
-
-
-/**
- * 4.14
- * 1.坐标轴反过来
- * 2.横坐标显示10个
- */
-
 
 

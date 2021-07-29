@@ -15,6 +15,11 @@ public interface IHealthView {
     void addHealthRecordsFail(String info);
 
 
+    void delHealthRecordsSuccess();
+
+    void delHealthRecordsFail(String info);
+
+
     void findHealthRecordsListSuccess(List<HealthFileBeen> healthFileBeens);
 
     void findHealthRecordsListFail(String info);

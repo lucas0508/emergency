@@ -40,6 +40,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -88,10 +89,10 @@ public class UARTControlScoreFragment extends Fragment implements UARTActivity.C
     private UARTInterface uartInterface;
     private boolean editMode;
     private MyReceiver myReceiver;
-    TextView tv_connect, mTime, mHistoricalData, tv_Battery;
+    TextView tv_connect, mTime, mHistoricalData, tv_Battery, tv_bga_pdcount, tv_bga_blow;
     BatteryView batteryview;
     Button mStartRobot;
-    ImageView iv_setting;
+    ImageView iv_setting,mmr;
     List<String> liscount;
     List<String> lisdata;
     private Handler handler;
@@ -184,6 +185,9 @@ public class UARTControlScoreFragment extends Fragment implements UARTActivity.C
         bga_pdcount_progress = view.findViewById(R.id.bga_pdcount_progress);
         bga_blow_progress = view.findViewById(R.id.bga_blow_progress);
         iv_setting = view.findViewById(R.id.iv_setting);
+        tv_bga_pdcount = view.findViewById(R.id.tv_bga_pdcount);
+        tv_bga_blow = view.findViewById(R.id.tv_bga_blow);
+        mmr = view.findViewById(R.id.mmr);
         iv_setting.setOnClickListener(v -> {
             Intent intent = new Intent(getActivity(), SettingActivity.class);
             startActivity(intent);
@@ -231,6 +235,10 @@ public class UARTControlScoreFragment extends Fragment implements UARTActivity.C
                         listPD1 = new ArrayList<>();
                         listPD_trough = new ArrayList<>();
                         g = 0;
+                        j = 0;
+                        bga_pdcount_progress.setProgress(j);
+                        bga_blow_progress.setProgress(g);
+                        initData();
                         startTimer();
                     }
                     liscount = new ArrayList<>();
@@ -248,8 +256,8 @@ public class UARTControlScoreFragment extends Fragment implements UARTActivity.C
      * 开始倒计时
      */
     private void startTimer() {
-        long totalTime = 10000;
-//        long totalTime = 10000;
+        long totalTime = 60000;
+//        long totalTime = 20000;
         // 初始化并启动倒计时
         new SimpleCountDownTimer(totalTime, mTime).setOnFinishListener(new SimpleCountDownTimer.OnFinishListener() {
             @Override
@@ -261,13 +269,13 @@ public class UARTControlScoreFragment extends Fragment implements UARTActivity.C
                             serverDataList.add("Blow" + "|" + listPD1.get(i).getP_time());
                         } else {
                             if (listPD1.get(i).getP_num() > listPD1.get(i - 1).getP_num() && listPD1.get(i).getP_num() >= listPD1.get(i + 1).getP_num()) {
-                                if (listPD1.get(i).getP_num() > 30) {
+                                if (listPD1.get(i).getP_num() > 10) {
 //                                bga_pdcount_progress.setProgress(j);
                                     Log.e(TAG, " 最后总次数--maxj-------> " + j);
                                     Log.e(TAG, " --最后总次数---maxj-time---> " + new Gson().toJson(listPD1.get(i)));
                                     serverDataList.add(listPD1.get(i).getP_num() + "|" + listPD1.get(i).getP_time());
-
                                 }
+
                             }
                             //n-1 =n  n< n+1				n-1<n  n<n+1		  n-1  >n   n=n+1
                             if (listPD1.get(i).getP_num() <= listPD1.get(i - 1).getP_num() && listPD1.get(i).getP_num() < listPD1.get(i + 1).getP_num()) {
@@ -275,19 +283,6 @@ public class UARTControlScoreFragment extends Fragment implements UARTActivity.C
                             }
                         }
                     }
-//                for (int i = 1; i < listPD1.size() - 1; i++) {
-//                    if (listPD.get(i) > listPD.get(i - 1) && listPD.get(i) >= listPD.get(i + 1)) {
-//                        if (listPD.get(i) > 30) {
-//                            Log.e(TAG, " --max-------> " + listPD.get(i));
-//                        }
-//                    }
-//
-//                    //n-1 =n  n< n+1				n-1<n  n<n+1		  n-1  >n   n=n+1
-//                    if (listPD.get(i) <= listPD.get(i - 1) && listPD.get(i) < listPD.get(i + 1)) {
-//                        Log.e(TAG, " --min-------> " + listPD.get(i));
-//                    }
-//                }
-
                     bga_pdcount_progress.setProgress(j);
                     bga_blow_progress.setProgress(g);
 
@@ -362,7 +357,7 @@ public class UARTControlScoreFragment extends Fragment implements UARTActivity.C
 
         dynamicLineChartManager1 = new DynamicLineChartManager(mChart1, names.get(0), colour.get(0));
 
-        dynamicLineChartManager1.setYAxis(130, 0, 10);
+        dynamicLineChartManager1.setYAxis(80, 0, 10);
 
         dynamicLineChartManager1.setHightLimitLine(60f, "", Color.GREEN);
         dynamicLineChartManager1.setHightLimitLine(50f, "", Color.GREEN);
@@ -384,7 +379,7 @@ public class UARTControlScoreFragment extends Fragment implements UARTActivity.C
         final TaskSucDialog taskSucDialog = new TaskSucDialog(requireActivity());
         Logger.d("数据+++》" + new Gson().toJson(data));
         Logger.d("数据+++》" + data.getBl_pd());
-        taskSucDialog.initData(data.getPd(), data.getPd_depth(), data.getBl_pd(), data.getPd_time(), data.getPd_rebound(), "还需加油，多加练习，再接再厉哦！");
+        taskSucDialog.initData(data.getPd(), data.getPd_depth(), data.getBl_pd(), data.getPd_time(), data.getPd_rebound(), data.getResult());
         taskSucDialog.setTaskClose(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -486,9 +481,10 @@ public class UARTControlScoreFragment extends Fragment implements UARTActivity.C
                     g++;
                     Log.e(TAG, "onReceive: 吹气：---->" + s);
                     //实时统计吹气次数
-//                    bga_blow_progress.setProgress(g);
-//                    serverDataList.add(s+","+System.currentTimeMillis());
-//                    listPD.add(s + "|" + System.currentTimeMillis());
+
+                    bga_blow_progress.setProgress(g);
+                    tv_bga_blow.setText("人工呼吸" + g + "次");
+                    mmrAnim();
                     listPD1.add(new PDData(-1, System.currentTimeMillis()));
                 } else if (s.contains("FWVer") || s.contains("HWVer")) {
                     return;
@@ -509,7 +505,7 @@ public class UARTControlScoreFragment extends Fragment implements UARTActivity.C
                     Log.e(TAG, " --实际总次数-----listPD1--> " + listPD1.size());
                     for (int i = 1; i < listPD1.size() - 1; i++) {
                         if (listPD1.get(i).getP_num() > listPD1.get(i - 1).getP_num() && listPD1.get(i).getP_num() >= listPD1.get(i + 1).getP_num()) {
-                            if (listPD1.get(i).getP_num() > 30) {
+                            if (listPD1.get(i).getP_num() > 10) {
                                 j++;
                                 //实时统计按压次数
 //                                bga_pdcount_progress.setProgress(j);
@@ -517,6 +513,9 @@ public class UARTControlScoreFragment extends Fragment implements UARTActivity.C
                                 Log.e(TAG, " --实际总次数---maxj-time---> " + new Gson().toJson(listPD1.get(i)));
                                 //serverDataList.add(listPD1.get(i).getP_num()+"|"+listPD1.get(i).getP_time());
                             }
+
+
+                            Log.e(TAG, " 实际总次数--maxj-------> " + j);
                         }
                         //n-1 =n  n< n+1				n-1<n  n<n+1		  n-1  >n   n=n+1
                         if (listPD1.get(i).getP_num() <= listPD1.get(i - 1).getP_num() && listPD1.get(i).getP_num() < listPD1.get(i + 1).getP_num()) {
@@ -559,6 +558,13 @@ public class UARTControlScoreFragment extends Fragment implements UARTActivity.C
             // do nothing, we were not connected to the sensor
         }
     }
+    /**
+     * 呼气  模拟人缩放动画
+     */
+    private void mmrAnim() {
+        mmr.startAnimation(AnimationUtils.loadAnimation(getActivity(), R.anim.mmr_scale));
+    }
+
 
     @Override
     public void onDestroy() {

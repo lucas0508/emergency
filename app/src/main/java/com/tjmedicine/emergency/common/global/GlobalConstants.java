@@ -4,23 +4,18 @@ package com.tjmedicine.emergency.common.global;
 public class GlobalConstants {
 
 
-  public static final String BASE_SERVER_ = "https://www.mengyuanyiliao.com";
+    public static final String BASE_SERVER_ = "https://www.mengyuanyiliao.com";
 
 
-//    public static final String BASE_SERVER_ = "http://39.104.170.185:8081";
-//
-//            public static final String BASE_SERVER_ = "http://192.168.1.9:8081";
+  //public static final String BASE_SERVER_ = "http://192.168.3.211:8081";
+
+//  public static final String BASE_SERVER_ = "http://192.168.3.202:8081";
+
 
     /**
      * 七牛云
      */
-    public static final String BASE_QI_NIU_URL_TOKEN = "http://192.168.1.150:8081";
-
-    /**
-     * 七牛云
-     */
-    public static final String BASE_QI_NIU_URL = "http://qnbajfh7n.hn-bkt.clouddn.com";
-
+    public static final String BASE_QI_NIU_URL = "http://qiniu.app.mengyuanyiliao.com";
 
 
     public static final String BASE_SERVER_URL = BASE_SERVER_ + "/mobile";
@@ -57,13 +52,13 @@ public class GlobalConstants {
     /**
      * 用户协议
      */
-    public static final String AGREEMENT_URL = BASE_QI_NIU_URL + "/privacy.html";
+    public static final String AGREEMENT_URL = BASE_SERVER_ + "/static/privacy.html";
 
 
-//    /**
-//     * 隐私政策
-//     */
-//    public static final String PRIVACYPOLICY_URL = "https://www.jiaogegongren.com/h5/agreement/user_serving.html";
+    /**
+     * 志愿者需知
+     */
+    public static final String PRIVACYPOLICY_URL = BASE_SERVER_ + "/static/privacy.html";
 
     /**
      * 问题反馈
@@ -137,6 +132,13 @@ public class GlobalConstants {
      * 添加健康档案
      */
     public static final String APP_USER_ADDHEALTH_RECORDS = BASE_SERVER_URL + "/user/addHealthRecords";
+
+
+    /**
+     * 删除健康档案
+     */
+    public static final String APP_USER_EDITHEALTH_RECORDS = BASE_SERVER_URL + "/user/editHealthRecords";
+
 
     /**
      * 查询健康档案列表

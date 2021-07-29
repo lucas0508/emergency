@@ -38,13 +38,13 @@
 
 
     <TextView
-
         android:id="@+id/tv_count"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:textColor="#ff626366"
         android:textSize="14sp"
+        android:layout_marginBottom="20dp"
         />
 
     <Button

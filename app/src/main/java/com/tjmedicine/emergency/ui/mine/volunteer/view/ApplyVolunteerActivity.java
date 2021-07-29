@@ -235,15 +235,13 @@ public class ApplyVolunteerActivity extends BaseActivity implements IApplyVolunt
             }
         });
 
-        /**
-         * 暂未提供志愿者须知
-         */
+
         tv_121_agreement.setOnClickListener(new OnMultiClickListener() {
             @Override
             public void onMultiClick(View v) {
                 //点击代码
                 Intent intent = new Intent(ApplyVolunteerActivity.this, WebActivity.class);
-                intent.putExtra(Constants.WEB_KEY_URL, "");
+                intent.putExtra(Constants.WEB_KEY_URL, GlobalConstants.PRIVACYPOLICY_URL);
                 intent.putExtra(Constants.WEB_KEY_FLAG, 1);
                 startActivity(intent);
             }
@@ -265,9 +263,6 @@ public class ApplyVolunteerActivity extends BaseActivity implements IApplyVolunt
             return;
         }
 
-        imgIdCardFront = "https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fimg1.gtimg.com%2Ffinance%2Fpics%2Fhv1%2F61%2F0%2F634%2F41225911.jpg&refer=http%3A%2F%2Fimg1.gtimg.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1611821938&t=fb0830a4b02e3b7480f5abfce706df4a";
-        imgIdCardBack = "https://ss1.bdstatic.com/70cFuXSh_Q1YnxGkpoWK1HF6hhy/it/u=2349422245,3515729816&fm=26&gp=0.jpg";
-        imgDoctorsCertificate = "https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=4094239006,461086539&fm=11&gp=0.jpg";
         Map<String, Object> objectMap = new HashMap<>();
         if (TextUtils.isEmpty(imgIdCardFront)) {
             mApp.shortToast("请上传身份证正面!");
@@ -293,14 +288,13 @@ public class ApplyVolunteerActivity extends BaseActivity implements IApplyVolunt
                 return;
             }
         }
-        objectMap.put("username", tv_chooseAddress.getText().toString().trim() + mName.getText().toString().trim());
-        objectMap.put("volunteerAddress", mAddress.getText().toString().trim());
+        objectMap.put("username",  mName.getText().toString().trim());
+        objectMap.put("volunteerAddress", tv_chooseAddress.getText().toString().trim()+mAddress.getText().toString().trim());
         objectMap.put("idUpUrl", imgIdCardFront);
         objectMap.put("idDownUrl", imgIdCardBack);
         objectMap.put("lng", UserInfo.getLang());
         objectMap.put("lat", UserInfo.getLat());
         objectMap.put("userType", userType);
-
         mApp.getLoadingDialog().show();
         applyVolunteerPresenter.applyVolunteer(objectMap);
     }
@@ -366,46 +360,6 @@ public class ApplyVolunteerActivity extends BaseActivity implements IApplyVolunt
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-/*        PhotoUtils.onActivityResult(requestCode, resultCode, data, getContext(), new PhotoUtils.CropHandler() {
-
-            @Override
-            public void handleCropResult(final Uri uri, int tag) {
-                Luban.with(EmergencyApplication.getContext())
-                        .load(uri.getPath())
-                        .ignoreBy(100)
-                        .setCompressListener(new OnCompressListener() {
-                            @Override
-                            public void onStart() {
-                            }
-
-                            @Override
-                            public void onSuccess(File file) {
-                                try {
-                                    if (selectIndex == 0) {
-                                        imgIdCardFront = file.getAbsolutePath();
-                                        Glide.with(ApplyVolunteerActivity.this).applyDefaultRequestOptions(new RequestOptions().centerCrop()).load(uri.getPath()).into(iv_id_card_front);
-                                    } else if (selectIndex == 1) {
-
-                                        imgIdCardBack = file.getAbsolutePath();
-                                        Glide.with(ApplyVolunteerActivity.this).applyDefaultRequestOptions(new RequestOptions().centerCrop()).load(uri.getPath()).into(iv_id_card_back);
-                                    }
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
-                            }
-
-                            @Override
-                            public void onError(Throwable e) {
-                                e.printStackTrace();
-                            }
-                        }).launch();
-            }
-
-            @Override
-            public void handleCropError(Intent data) {
-                mApp.shortToast("图片错误");
-            }
-        });*/
         PhotoUtils.onActivityResult(requestCode, resultCode, data, getContext(), new PhotoUtils.CropHandler() {
             @Override
             public void handleCropResult(final Uri uri, int tag) {
