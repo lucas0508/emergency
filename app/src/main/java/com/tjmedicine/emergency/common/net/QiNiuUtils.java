@@ -9,6 +9,7 @@ import com.google.gson.reflect.TypeToken;
 import com.qiniu.android.http.ResponseInfo;
 import com.qiniu.android.storage.UpCompletionHandler;
 import com.qiniu.android.storage.UploadManager;
+import com.tjmedicine.emergency.EmergencyApplication;
 import com.tjmedicine.emergency.common.global.GlobalConstants;
 import com.tjmedicine.emergency.utils.GsonUtils;
 
@@ -189,7 +190,7 @@ public class QiNiuUtils {
      * @return
      */
     private String saveMyBitmap(String filename, Bitmap bit) {
-        String baseDir = Environment.getExternalStorageDirectory().getAbsolutePath()+"/121急救/";
+        String baseDir = EmergencyApplication.getContext().getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS).getAbsolutePath()+"/121急救/";
         String filePath = baseDir + filename;
         File dir = new File(baseDir);
         if (!dir.exists()) {

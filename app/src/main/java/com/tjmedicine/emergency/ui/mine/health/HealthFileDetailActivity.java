@@ -13,6 +13,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.flexbox.FlexDirection;
 import com.google.android.flexbox.FlexWrap;
 import com.google.android.flexbox.FlexboxLayoutManager;
+import com.google.gson.Gson;
+import com.orhanobut.logger.Logger;
 import com.tjmedicine.emergency.R;
 import com.tjmedicine.emergency.common.base.BaseActivity;
 import com.tjmedicine.emergency.common.base.OnMultiClickListener;
@@ -287,9 +289,11 @@ public class HealthFileDetailActivity extends BaseActivity implements IHealthVie
         if (null != tags && tags.size() > 0) {
             if (tags.size() > 1) {
                 List<HealthAllFileBeen.TagsBean.ChildsBean> child11 = tags.get(0).getChilds();
-                HealthTagBeen.ChildsBean childsBean1 = new HealthTagBeen.ChildsBean();
+
+                Logger.d("数据："+new Gson().toJson(child11));
                 tv_tag1.setText(tags.get(0).getValue());
                 for (int i = 0; i < child11.size(); i++) {
+                    HealthTagBeen.ChildsBean childsBean1 = new HealthTagBeen.ChildsBean();
                     childsBean1.setId(child11.get(i).getId());
                     childsBean1.setValue(child11.get(i).getValue());
                     childs1.add(childsBean1);
@@ -301,8 +305,8 @@ public class HealthFileDetailActivity extends BaseActivity implements IHealthVie
             if (tags.size() == 2) {
                 tv_tag2.setText(tags.get(1).getValue());
                 List<HealthAllFileBeen.TagsBean.ChildsBean> childs22 = tags.get(1).getChilds();
-                HealthTagBeen.ChildsBean childsBean2 = new HealthTagBeen.ChildsBean();
                 for (int i = 0; i < childs22.size(); i++) {
+                    HealthTagBeen.ChildsBean childsBean2 = new HealthTagBeen.ChildsBean();
                     childsBean2.setId(childs22.get(i).getId());
                     childsBean2.setValue(childs22.get(i).getValue());
                     childs2.add(childsBean2);

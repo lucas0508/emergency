@@ -317,9 +317,7 @@ public class HomePageFragment extends BaseFragment implements AMap.OnMapLoadedLi
         mEquipment.setOnClickListener(new OnMultiClickListener() {
             @Override
             public void onMultiClick(View v) {
-
-
-                AnimUtil.starAnim2(mAids);
+                AnimUtil.starAnim2(mEquipment);
                 mApp.shortToast("攻城狮正在开发中...");
                // startActivity(SystemInformationActivity.class);
             }
@@ -329,7 +327,6 @@ public class HomePageFragment extends BaseFragment implements AMap.OnMapLoadedLi
             @Override
             public void onMultiClick(View v) {
                 startActivity(SystemInformationActivity.class);
-
             }
         });
     }

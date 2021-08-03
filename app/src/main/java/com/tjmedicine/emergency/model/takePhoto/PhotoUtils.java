@@ -79,7 +79,8 @@ public class PhotoUtils {
     public static void openCamera(Activity context) {
         if (hasSdcard()) {
             String name = String.format("image-%d.jpg", System.currentTimeMillis());
-            String path = Environment.getExternalStorageDirectory().getPath();
+            String path = context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS).getPath();
+            //String path = Environment.getExternalStorageDirectory().getPath();
             File file = new File(path, name);
             mCameraPhotoPath = file.toString();
             mCameraUri = Uri.fromFile(file);

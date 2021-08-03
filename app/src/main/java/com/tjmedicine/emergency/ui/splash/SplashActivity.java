@@ -53,8 +53,6 @@ public class SplashActivity extends BaseActivity {
         isFirst = PreferenceUtil.getBoolean("isFirst", true);
         mHideHandler.postDelayed(gotoPage, 3000);
 
-
-
     }
 
     private void ActivityJump() {

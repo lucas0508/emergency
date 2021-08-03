@@ -264,7 +264,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginBottom="20dp"
-                android:text="内蒙古蒙元医疗网络科技有限公司"
+                android:text="内蒙古蒙元医疗科技有限公司"
                 android:visibility="gone" />
 
 

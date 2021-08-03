@@ -136,7 +136,7 @@ public class HealthFileActivity extends BaseActivity implements IHealthView {
 
                 final AlertDialog dialog = new AlertDialog.Builder(HealthFileActivity.this)
                         .setTitle("提示")
-                        .setMessage("是否删除该紧急联系人")
+                        .setMessage("是否删除该健康档案？")
                         .setNegativeButton("取消", null)
                         .setPositiveButton("确定", new DialogInterface.OnClickListener() {
                             @Override

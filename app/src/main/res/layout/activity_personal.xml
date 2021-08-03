@@ -33,9 +33,9 @@
 
             <com.tjmedicine.emergency.model.widget.RoundImageView
                 android:id="@+id/riv_headImage"
-                android:layout_width="49dp"
-                android:layout_height="49dp"
-                android:layout_marginEnd="15dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
                 android:scaleType="centerCrop"
                 app:type="circle" />
 

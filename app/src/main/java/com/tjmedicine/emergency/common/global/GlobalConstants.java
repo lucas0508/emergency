@@ -11,7 +11,6 @@ public class GlobalConstants {
 
 //  public static final String BASE_SERVER_ = "http://192.168.3.202:8081";
 
-
     /**
      * 七牛云
      */
